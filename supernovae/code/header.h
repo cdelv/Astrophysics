@@ -5,11 +5,17 @@
 #include <vector>
 #include <cmath>
 
+
 struct Config
 {
-  int x=1;
+  double t_max;
+  double dt;
+  double E;
+  double R_influ;
+  int N;
 };
 
+//Vector.cpp
 class vector3D{
   double v[3];
  public:
@@ -43,6 +49,7 @@ class vector3D{
   friend  double norma(vector3D v1);    
 };
 
+//cuerpo_class.cpp
 class Cuerpo{
 private:
   vector3D  r, V, F;   double m, R;
@@ -58,13 +65,36 @@ public:
   double GetVx(void){return V.x();};
   double GetVy(void){return V.y();};
   double GetVz(void){return V.z();};
+  double Getm(void){return m;};
+  double GetR(void){return R;};
+  double GetF(void){return norma(F);};
 
   friend class Colisionador;
 };
 
-  void Configure(Config &data);
-  void Initialize_system(Config &data, std::vector <Cuerpo> &star, std::vector <Cuerpo> &star_dust);
-  void Propagate(Config &data, std::vector <Cuerpo> &star, std::vector <Cuerpo> &star_dust);
+class Colisionador{
+
+private:
+
+public:
+  void CalculeFuerzas(std::vector<Cuerpo> &star);
+  void CalculeFuerzaEntre(Cuerpo &Molecula1, Cuerpo &Molecula2);
+};
+
+//configure.cpp
+void configure(char *argv[], Config &data);
+
+//start.cpp
+void Initialize_system(Config &data, std::vector <Cuerpo> &star);
+
+//propagate.cpp
+void Propagate(Config &data, std::vector <Cuerpo> &star);
+void integrate(Config &data, std::vector <Cuerpo> &star);
+
+//results.cpp
 void Results(void);
+
+//tools.cpp
+void tokenize(std::string &str, char delim, std::vector<std::string> &out);
 
 
