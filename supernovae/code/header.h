@@ -13,6 +13,7 @@ struct Config
   double E;
   double R_influ;
   int N;
+  int Frames;
 };
 
 //Vector.cpp
@@ -59,6 +60,8 @@ public:
   void AdicioneFuerza(vector3D F0){F+=F0;};
   void Mueva_r(double dt, double coeficiente);
   void Mueva_V(double dt, double coeficiente);
+  void Add_m(double M);
+  void Edit_r(double r){R=r;};
   double Getx(void){return r.x();};
   double Gety(void){return r.y();}; 
   double Getz(void){return r.z();}; 
@@ -96,5 +99,7 @@ void Results(void);
 
 //tools.cpp
 void tokenize(std::string &str, char delim, std::vector<std::string> &out);
+void init_files(void);
+void Animation(Config &data, std::vector <Cuerpo> &star, int i);
 
 

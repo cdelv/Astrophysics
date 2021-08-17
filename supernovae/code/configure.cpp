@@ -7,4 +7,6 @@ void configure(char *argv[], Config &data)
   data.E=std::atof(argv[3]);
   data.N=std::atoi(argv[4]);
   data.R_influ=std::atof(argv[5]);
+  data.Frames=std::atoi(argv[6]);
+  init_files();
 }

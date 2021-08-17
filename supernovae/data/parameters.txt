@@ -3,3 +3,4 @@
 1			#energy
 100			#num fragmentos
 100			#r esfera de influencia
+100			#numero de frames

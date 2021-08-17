@@ -10,12 +10,12 @@ void Colisionador::CalculeFuerzas(std::vector<Cuerpo> &star){
 
   //Calcular las fuerzas entre las estrellas y los fragmentos
   //Los fragmentos no se hacen fuerza entre ellos (por ahora)
-  CalculeFuerzaEntre(star[0], star[1]);
-  /*for(int i=0; i<2; i++)
+
+  for(int i=0; i<2; i++)
     for(int j=i+1; j<star.size(); j++)
       {
 	CalculeFuerzaEntre(star[i], star[j]);
-	}*/
+      }
 }
 void Colisionador::CalculeFuerzaEntre(Cuerpo &Molecula1, Cuerpo &Molecula2){
   vector3D r21=Molecula2.r-Molecula1.r;

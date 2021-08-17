@@ -8,12 +8,17 @@ const double const5 = 1-2*(const3+const1); //1-2*(Xi+zeta)
 
 void Propagate(Config &data, std::vector <Cuerpo> &star)
 {
-  double t;
-  std::cout << star[0].Getx() <<"\t"<< star[0].Gety() <<"\t"<< star[1].Getx() <<"\t"<<star[1].Gety()<< std::endl;
-  for(t=0; t<data.t_max; t+=data.dt)
+  double t, tdibujo=0; int i=0;
+  Animation(data, star, i); i++; //imprimir posicion inicial para la animacion
+  
+  for(t=0; t<data.t_max; t+=data.dt, tdibujo+=data.dt)
     {
+      if(tdibujo>data.t_max/data.Frames)
+	{
+	  Animation(data, star, i); i++;
+	  tdibujo=0;
+	}
       integrate(data,star);
-      std::cout << star[0].Getx() <<"\t"<< star[0].Gety() <<"\t"<< star[1].Getx() <<"\t"<<star[1].Gety()<< std::endl;
     }
 }
 void integrate(Config &data, std::vector <Cuerpo> &star)

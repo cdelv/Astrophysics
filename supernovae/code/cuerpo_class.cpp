@@ -13,4 +13,6 @@ void Cuerpo::Mueva_r(double dt, double coeficiente){
 void Cuerpo::Mueva_V(double dt, double coeficiente){
   V+=(F*dt*coeficiente)/m;
 }
-
+void Cuerpo::Add_m(double M){
+  m+=M;
+}
