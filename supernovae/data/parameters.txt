@@ -1,6 +1,9 @@
 15			#t
-0.01			#dt
+0.001			#dt
 1			#energy
 100			#num fragmentos
 100			#r esfera de influencia
 100			#numero de frames
+300			#numero de fragmentos
+10			#porcentaje de masa que pierde la estrella
+10			#Energia de explosion

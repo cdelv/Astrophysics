@@ -16,3 +16,7 @@ void Cuerpo::Mueva_V(double dt, double coeficiente){
 void Cuerpo::Add_m(double M){
   m+=M;
 }
+void Cuerpo::colide(double M, vector3D v)
+{
+  V=(m*V+M*v)/(m+M);
+}

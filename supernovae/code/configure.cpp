@@ -8,5 +8,8 @@ void configure(char *argv[], Config &data)
   data.N=std::atoi(argv[4]);
   data.R_influ=std::atof(argv[5]);
   data.Frames=std::atoi(argv[6]);
+  data.N_frag=std::atoi(argv[7]);
+  data.M_loss=std::atof(argv[8]);
+  data.Exp_E=std::atof(argv[9]);
   init_files();
 }

@@ -21,12 +21,23 @@ void init_files(void)
 void Animation(Config &data, std::vector <Cuerpo> &star, int i)
 {
   std::ofstream fout;
-  fout.open(("data/animation/Frame_"+std::to_string(i)+".csv").c_str());
+  fout.open(("data/animation/Frame_star_"+std::to_string(i)+".csv").c_str());
   fout << "X" <<","<< "Y" <<","<< "Z" <<","<< "R" << std::endl;
-  for(auto i: star)
-      fout << i.Getx() <<","<< i.Gety()<<","<<i.Getz()<<","<<i.GetR() << std::endl;
+  for(int i=0; i<2; i++)
+    fout << star[i].Getx() <<","<< star[i].Gety()<<","<<star[i].Getz()<<","<<star[i].GetR() << std::endl;
   fout.close();
+
+  std::ofstream fout1;
+  fout1.open(("data/animation/Frame_fragment_"+std::to_string(i)+".csv").c_str());
+  fout1 << "X" <<","<< "Y" <<","<< "Z" <<","<< "R" << std::endl;
+  for(int i=2; i<star.size(); i++)
+      fout1 << star[i].Getx() <<","<< star[i].Gety()<<","<<star[i].Getz()<<","<<star[i].GetR() << std::endl;
+  fout.close();
+  
   //fout.open("EnergiaTotal.dat", std::fstream::in | std::fstream::out | std::fstream::app);
+}
 
-
+void MultiplyVectorByScalar(std::vector<double> &myarray, double myconstant)
+{
+std::transform(myarray.begin(), myarray.end(), myarray.begin(), [&myconstant](auto& c){return c*myconstant;});
 }

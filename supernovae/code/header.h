@@ -4,6 +4,9 @@
 #include <string>
 #include <vector>
 #include <cmath>
+#include <random>
+#include <numeric>
+#include<algorithm>
 
 
 struct Config
@@ -14,6 +17,9 @@ struct Config
   double R_influ;
   int N;
   int Frames;
+  int N_frag;
+  double M_loss;
+  double Exp_E;
 };
 
 //Vector.cpp
@@ -60,6 +66,7 @@ public:
   void AdicioneFuerza(vector3D F0){F+=F0;};
   void Mueva_r(double dt, double coeficiente);
   void Mueva_V(double dt, double coeficiente);
+  void colide(double M, vector3D v);
   void Add_m(double M);
   void Edit_r(double r){R=r;};
   double Getx(void){return r.x();};
@@ -93,6 +100,7 @@ void Initialize_system(Config &data, std::vector <Cuerpo> &star);
 //propagate.cpp
 void Propagate(Config &data, std::vector <Cuerpo> &star);
 void integrate(Config &data, std::vector <Cuerpo> &star);
+void explode(Config &data, std::vector <Cuerpo> &star);
 
 //results.cpp
 void Results(void);
@@ -101,5 +109,6 @@ void Results(void);
 void tokenize(std::string &str, char delim, std::vector<std::string> &out);
 void init_files(void);
 void Animation(Config &data, std::vector <Cuerpo> &star, int i);
+void MultiplyVectorByScalar(std::vector<double> &v, double k);
 
 
