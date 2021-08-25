@@ -13,13 +13,12 @@ struct Config
 {
   double t_max;
   double dt;
-  double E;
   double R_influ;
-  int N;
   int Frames;
   int N_frag;
   double M_loss;
   double Exp_E;
+  double TE;
 };
 
 //Vector.cpp
@@ -59,7 +58,7 @@ class vector3D{
 //cuerpo_class.cpp
 class Cuerpo{
 private:
-  vector3D  r, V, F;   double m, R;
+  vector3D  r, V, F, dmdt;   double m, R, rho=1;
 public:
   Cuerpo(double x0, double y0, double z0, double Vx0, double Vy0, double Vz0, double m0,double R0);
   void BorreFuerza(void){F.cargue(0,0,0);};
@@ -67,7 +66,7 @@ public:
   void Mueva_r(double dt, double coeficiente);
   void Mueva_V(double dt, double coeficiente);
   void colide(double M, vector3D v);
-  void Add_m(double M);
+  void Add_m(double M, vector3D v);
   void Edit_r(double r){R=r;};
   double Getx(void){return r.x();};
   double Gety(void){return r.y();}; 
@@ -77,6 +76,7 @@ public:
   double GetVz(void){return V.z();};
   double Getm(void){return m;};
   double GetR(void){return R;};
+  double Get_rho(void){return rho;};
   double GetF(void){return norma(F);};
 
   friend class Colisionador;

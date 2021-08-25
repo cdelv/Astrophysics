@@ -11,16 +11,17 @@ void Propagate(Config &data, std::vector <Cuerpo> &star)
   double t, tdibujo=0; int i=0;
   Animation(data, star, i); i++; //imprimir posicion inicial para la animacion
   
-  for(t=0; t<data.t_max; t+=data.dt, tdibujo+=data.dt)
+  for(t=0; t<=data.t_max; t+=data.dt, tdibujo+=data.dt)
     {
       if(tdibujo>data.t_max/data.Frames)
 	{
 	  Animation(data, star, i); i++;
 	  tdibujo=0;
 	}
-      if(data.dt*30 < t && t < data.dt*31)
+      if( data.TE < t && t < data.TE+data.dt)
 	{
 	  explode(data,star);
+	  //explode(data,star);
 	}
       
       integrate(data,star);
@@ -53,13 +54,13 @@ void explode(Config &data, std::vector <Cuerpo> &star)
   std::vector <double> z0;
   vector3D v0;
   vector3D r0;
-  double rho=3*star[1].Getm()/(4*M_PI*std::pow(star[1].GetR(),3)), normr0, normE;
+  double normr0, normE;
   double rr,th,ph;
   
   std::mt19937 gen(4);//semilla 4
   std::normal_distribution<> m{5,2};//mu,sigma  //d(gen)
   std::normal_distribution<> e{5,2};//mu,sigma  //d(gen)
-  std::uniform_real_distribution<> ur(star[1].GetR()*2+star[1].GetR()*data.M_loss/100, star[1].GetR()*4); // uniform, unbiased
+  std::uniform_real_distribution<> ur(star[1].GetR()*1.5, star[1].GetR()*2.5); // uniform, unbiased //-std::cbrt(3*data.M_loss/(100*4*M_PI*rho))
   std::uniform_real_distribution<> ut(0, M_PI); // uniform, unbiased
   std::uniform_real_distribution<> up(0, 2*M_PI); // uniform, unbiased
 
@@ -89,9 +90,10 @@ void explode(Config &data, std::vector <Cuerpo> &star)
     {
       r0.cargue(x0[i]-star[1].Getx(), y0[i]-star[1].Gety(), z0[i]-star[1].Getz());
       normr0=norma(r0);
-      normE=std::sqrt(2*std::abs(energies[i]/masses[i]));
+      normE=std::sqrt(2*energies[i]/masses[i]);
       v0=r0*(normE/normr0);
-      Cuerpo point(x0[i], y0[i], z0[i], v0.x(), v0.y(), v0.z(), masses[i], std::cbrt(3*masses[i]/(4*M_PI*rho)));
+      Cuerpo point(x0[i], y0[i], z0[i], v0.x(), v0.y(), v0.z(), masses[i], std::cbrt(3*masses[i]/(4*M_PI*star[1].Get_rho())));
       star.push_back(point);
+      star[1].Add_m(-masses[i],v0);
     }
 }

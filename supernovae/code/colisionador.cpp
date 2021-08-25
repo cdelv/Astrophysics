@@ -3,7 +3,8 @@
 const double G=1;
 
 void Colisionador::CalculeFuerzas(std::vector<Cuerpo> &star){
-  
+  vector3D r21;
+  double d, s;
   //borrar todas las fuerzas
   for(int i=0; i<star.size();i++)
     star[i].BorreFuerza();
@@ -15,12 +16,21 @@ void Colisionador::CalculeFuerzas(std::vector<Cuerpo> &star){
     for(int j=i+1; j<star.size(); j++)
       {
 	CalculeFuerzaEntre(star[i], star[j]);
+	
+	r21=star[j].r-star[i].r;
+	d=norma(r21);
+	s=(star[i].R+star[j].R)-d; //distancia de interpenetracion
+	if (s>0)
+	  {
+	    star[i].colide(star[j].m,star[j].V);
+	    star.erase(star.begin() + j);
+	    j--;
+	  }
       }
 }
 void Colisionador::CalculeFuerzaEntre(Cuerpo &Molecula1, Cuerpo &Molecula2){
   vector3D r21=Molecula2.r-Molecula1.r;
-  double d=norma(r21);
-  //double s=(Molecula1.R+Molecula2.R)-d; //distancia de interpenetracion   if (s>0){ colisionan  F2= K*std::pow(s,1.5)*n;
+  double d=norma(r21);  
   vector3D n= r21*(1.0/d);
   vector3D F= -G*Molecula1.m*Molecula2.m*std::pow(d,-2)*n;
 
