@@ -33,16 +33,16 @@ void integrate(Config &data, std::vector <Cuerpo> &star)
   Colisionador Newton;
   //Muevase con Omelyan PEFRL
   for(int i=0; i<star.size(); i++) star[i].Mueva_r(data.dt,const1);
-  Newton.CalculeFuerzas(star);
+  Newton.CalculeFuerzas(star,data);
   for(int i=0; i<star.size(); i++) star[i].Mueva_V(data.dt,const2);
   for(int i=0; i<star.size(); i++) star[i].Mueva_r(data.dt,const3);
-  Newton.CalculeFuerzas(star);
+  Newton.CalculeFuerzas(star,data);
   for(int i=0; i<star.size(); i++) star[i].Mueva_V(data.dt,const4);
   for(int i=0; i<star.size(); i++) star[i].Mueva_r(data.dt,const5);
-  Newton.CalculeFuerzas(star);
+  Newton.CalculeFuerzas(star,data);
   for(int i=0; i<star.size(); i++) star[i].Mueva_V(data.dt,const4);
   for(int i=0; i<star.size(); i++) star[i].Mueva_r(data.dt,const3);
-  Newton.CalculeFuerzas(star);
+  Newton.CalculeFuerzas(star,data);
   for(int i=0; i<star.size(); i++) star[i].Mueva_V(data.dt,const2);
   for(int i=0; i<star.size(); i++) star[i].Mueva_r(data.dt,const1);
 }

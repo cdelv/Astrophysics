@@ -51,7 +51,7 @@ std::transform(myarray.begin(), myarray.end(), myarray.begin(), [&myconstant](au
 }
 void Progress(double progress)
 {
-  int barWidth = 70;
+  int barWidth = 60;
 
   if(progress<=1)
     {

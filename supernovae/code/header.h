@@ -91,7 +91,7 @@ class Colisionador{
 private:
 
 public:
-  void CalculeFuerzas(std::vector<Cuerpo> &star);
+  void CalculeFuerzas(std::vector<Cuerpo> &star, Config &data);
   void CalculeFuerzaEntre(Cuerpo &Molecula1, Cuerpo &Molecula2);
 };
 
