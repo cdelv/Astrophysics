@@ -18,6 +18,14 @@ void init_files(void)
   //fout.open("data/animation/EnergiaTotal.dat");
   
 }
+
+void print_body(Cuerpo &star)
+{
+  std::cout << std::fixed;
+  std::cout << std::setprecision(2);
+  std::cout << star.Getx() <<"\t"<< star.Gety() <<"\t"<< star.Getz() <<"\t"<< star.GetVx() <<"\t"<<  star.GetVy() <<"\t"<< star.GetVz() <<"\t"<< star.GetFx() <<"\t"<< star.GetFy() <<"\t"<< star.GetFz() <<"\t"<< star.Getm() <<"\t"<< star.GetR() <<"\t"<< star.Get_rho() <<"\t"<< star.GetF() <<std::endl;
+}
+
 void Animation(Config &data, std::vector <Cuerpo> &star, int i)
 {
   std::ofstream fout;
@@ -41,3 +49,21 @@ void MultiplyVectorByScalar(std::vector<double> &myarray, double myconstant)
 {
 std::transform(myarray.begin(), myarray.end(), myarray.begin(), [&myconstant](auto& c){return c*myconstant;});
 }
+void Progress(double progress)
+{
+  int barWidth = 70;
+
+  if(progress<=1)
+    {
+      std::cout << "[";
+      int pos = barWidth * progress;
+      for (int i = 0; i < barWidth; ++i) {
+	if (i < pos) std::cout << "=";
+	else if (i == pos) std::cout << ">";
+	else std::cout << " ";}
+      
+      std::cout << "] " << int(progress * 100.0) << " %\r";
+      std::cout.flush();
+    }
+}
+

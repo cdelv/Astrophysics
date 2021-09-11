@@ -15,8 +15,7 @@ void Colisionador::CalculeFuerzas(std::vector<Cuerpo> &star){
   for(int i=0; i<2; i++)
     for(int j=i+1; j<star.size(); j++)
       {
-	CalculeFuerzaEntre(star[i], star[j]);
-	
+	int yes=0;
 	r21=star[j].r-star[i].r;
 	d=norma(r21);
 	s=(star[i].R+star[j].R)-d; //distancia de interpenetracion
@@ -25,7 +24,10 @@ void Colisionador::CalculeFuerzas(std::vector<Cuerpo> &star){
 	    star[i].colide(star[j].m,star[j].V);
 	    star.erase(star.begin() + j);
 	    j--;
+	    yes=1;
 	  }
+	if(yes==0)
+	  CalculeFuerzaEntre(star[i], star[j]);
       }
 }
 void Colisionador::CalculeFuerzaEntre(Cuerpo &Molecula1, Cuerpo &Molecula2){

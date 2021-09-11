@@ -7,6 +7,7 @@
 #include <random>
 #include <numeric>
 #include<algorithm>
+#include <iomanip>
 
 
 struct Config
@@ -74,6 +75,9 @@ public:
   double GetVx(void){return V.x();};
   double GetVy(void){return V.y();};
   double GetVz(void){return V.z();};
+  double GetFx(void){return F.x();};
+  double GetFy(void){return F.y();};
+  double GetFz(void){return F.z();};
   double Getm(void){return m;};
   double GetR(void){return R;};
   double Get_rho(void){return rho;};
@@ -110,5 +114,7 @@ void tokenize(std::string &str, char delim, std::vector<std::string> &out);
 void init_files(void);
 void Animation(Config &data, std::vector <Cuerpo> &star, int i);
 void MultiplyVectorByScalar(std::vector<double> &v, double k);
+void print_body(Cuerpo &star);
+void Progress(double progress);
 
 

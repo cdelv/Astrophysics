@@ -7,7 +7,7 @@ int main(int argc, char *argv[])
 
   configure(argv,data);
   Initialize_system(data,star);
-
+ 
   Propagate(data,star);
 
   Results();
