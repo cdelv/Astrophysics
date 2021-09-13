@@ -12,12 +12,6 @@ void tokenize(std::string &str, char delim, std::vector<std::string> &out)
       out.push_back(str.substr(start, end - start));
     }
 }
-void init_files(void)
-{
-  //std::ofstream fout;
-  //fout.open("data/animation/EnergiaTotal.dat");
-  
-}
 
 void print_body(Cuerpo &star)
 {

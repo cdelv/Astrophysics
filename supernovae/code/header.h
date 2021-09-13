@@ -71,10 +71,12 @@ public:
   void Edit_r(double r){R=r;};
   double Getx(void){return r.x();};
   double Gety(void){return r.y();}; 
-  double Getz(void){return r.z();}; 
+  double Getz(void){return r.z();};
+  vector3D Getr(void){return r;}; 
   double GetVx(void){return V.x();};
   double GetVy(void){return V.y();};
   double GetVz(void){return V.z();};
+  double GetV2(void){return norma2(V);};
   double GetFx(void){return F.x();};
   double GetFy(void){return F.y();};
   double GetFz(void){return F.z();};
@@ -100,6 +102,7 @@ void configure(char *argv[], Config &data);
 
 //start.cpp
 void Initialize_system(Config &data, std::vector <Cuerpo> &star);
+void init_files(void);
 
 //propagate.cpp
 void Propagate(Config &data, std::vector <Cuerpo> &star);
@@ -107,11 +110,17 @@ void integrate(Config &data, std::vector <Cuerpo> &star);
 void explode(Config &data, std::vector <Cuerpo> &star);
 
 //results.cpp
-void Results(void);
+void Results(Config &data, std::vector <Cuerpo> &star, double t);
+double Kenergy(std::vector <Cuerpo> &star);
+double Penergy(std::vector <Cuerpo> &star);
+double SKenergy(std::vector <Cuerpo> &star);
+double SPenergy(std::vector <Cuerpo> &star);
+vector3D Mcenter(std::vector <Cuerpo> &star);
+vector3D SMcenter(std::vector <Cuerpo> &star);
+
 
 //tools.cpp
 void tokenize(std::string &str, char delim, std::vector<std::string> &out);
-void init_files(void);
 void Animation(Config &data, std::vector <Cuerpo> &star, int i);
 void MultiplyVectorByScalar(std::vector<double> &v, double k);
 void print_body(Cuerpo &star);

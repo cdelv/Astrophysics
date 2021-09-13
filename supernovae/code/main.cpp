@@ -9,8 +9,6 @@ int main(int argc, char *argv[])
   Initialize_system(data,star);
  
   Propagate(data,star);
-
-  Results();
   
   return 0;
 }

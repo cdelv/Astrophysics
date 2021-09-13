@@ -15,7 +15,8 @@ void Propagate(Config &data, std::vector <Cuerpo> &star)
     {
       if(tdibujo>data.t_max/data.Frames)
 	{
-	  Animation(data, star, i); i++;	  
+	  Animation(data, star, i); i++;
+	  Results(data,star,t);
 	  Progress((1.0*i)/data.Frames);
 	  tdibujo=0;
 	}

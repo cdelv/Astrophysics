@@ -1,4 +1,4 @@
-5000			#t
+1000			#t
 0.001			#dt
 500			#num fragmentos
 1000			#r esfera de influencia

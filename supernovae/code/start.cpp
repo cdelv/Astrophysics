@@ -15,5 +15,20 @@ void Initialize_system(Config &data, std::vector <Cuerpo> &star)
 		   std::atof((a[4]).c_str()), std::atof((a[5]).c_str()), std::atof((a[6]).c_str()), std::atof((a[7]).c_str()));
       star.push_back(point);
     }
+  init_files();
 }
+void init_files(void)
+{
+  std::ofstream fout;
+  fout.open("data/TotalEnergy.dat");
+  fout.close();
 
+  fout.open("data/StarEnergy.dat");
+  fout.close();
+
+  fout.open("data/Mass.dat");
+  fout.close();
+
+  fout.open("data/Baricenter.dat");
+  fout.close(); 
+}

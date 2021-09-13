@@ -40,6 +40,10 @@ objects/%.o: code/%.cpp
 graph:
 	@echo -e '\n'
 	@echo -e 'Making graphs...\n'
+	@gnuplot scripts/Baricenter.gp
+	@gnuplot scripts/Mass.gp
+	@gnuplot scripts/Senergy.gp
+	@gnuplot scripts/Tenergy.gp
 	@echo -e 'Done!\n'
 
 clean:
