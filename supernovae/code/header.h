@@ -117,6 +117,7 @@ double SKenergy(std::vector <Cuerpo> &star);
 double SPenergy(std::vector <Cuerpo> &star);
 vector3D Mcenter(std::vector <Cuerpo> &star);
 vector3D SMcenter(std::vector <Cuerpo> &star);
+void rv2coes(std::vector <Cuerpo> &star, std::vector <double> &coes, int j);
 
 
 //tools.cpp

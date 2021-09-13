@@ -5,7 +5,7 @@ set style line 2 lc rgb "red" lt 1 lw 2 pt 7 ps 0.5
 set style line 3 lc rgb "green" lt 1 lw 2 pt 7 ps 0.5
 set style line 4 lc rgb "orange" lt 1 lw 2 pt 7 ps 0.5
 
-set title "Baricenter vs. Time
+set title "Baricenter trayectory
 set xlabel 'x'
 set ylabel 'y'
 set zlabel 'z'

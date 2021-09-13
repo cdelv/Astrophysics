@@ -44,6 +44,7 @@ graph:
 	@gnuplot scripts/Mass.gp
 	@gnuplot scripts/Senergy.gp
 	@gnuplot scripts/Tenergy.gp
+	@python3 scripts/coes.py
 	@echo -e 'Done!\n'
 
 clean:

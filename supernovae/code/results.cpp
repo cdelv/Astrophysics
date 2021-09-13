@@ -29,7 +29,18 @@ void Results(Config &data, std::vector <Cuerpo> &star, double t)
   d=SMcenter(star);
   fout.open("data/Baricenter.dat", std::fstream::in | std::fstream::out | std::fstream::app);
   fout << t <<","<< c.x() <<","<< c.y() <<","<< c.z() <<","<< d.x() <<","<< d.y() <<","<< d.z() <<std::endl;
-  fout.close();  
+  fout.close();
+  //COES estrella 1
+  std::vector <double> coes;
+  rv2coes(star,coes,0);
+  fout.open("data/COES1.dat", std::fstream::in | std::fstream::out | std::fstream::app);
+  fout << t <<","<< coes[0] <<","<< coes[1] <<","<< coes[2] <<","<< coes[3] <<","<< coes[4] <<","<< coes[5] <<std::endl;
+  fout.close();
+  //COES estrella 2
+  fout.open("data/COES2.dat", std::fstream::in | std::fstream::out | std::fstream::app);
+  rv2coes(star,coes,1);
+  fout << t <<","<< coes[0] <<","<< coes[1] <<","<< coes[2] <<","<< coes[3] <<","<< coes[4] <<","<< coes[5] <<std::endl;
+  fout.close();
 }
 double Kenergy(std::vector <Cuerpo> &star)
 {
@@ -76,4 +87,51 @@ vector3D Mcenter(std::vector <Cuerpo> &star)
 vector3D SMcenter(std::vector <Cuerpo> &star)
 {
   return (star[0].Getm()*star[0].Getr()+star[1].Getm()*star[1].Getr())/(star[0].Getm()+star[1].Getm());
+}
+void rv2coes(std::vector <Cuerpo> &star, std::vector <double> &coes, int j)
+{
+  vector3D c, h, r, v, e, n;
+  double i, raan, aop, ta, a, G=1, mu=G*(star[0].Getm()+star[1].Getm());
+  double norm_r, norm2_v, norm_h, norm_e, norm_n;
+  
+  c=SMcenter(star);
+  r.cargue(star[j].Getx(),star[j].Gety(),star[j].Getz()); r=r-c; //vector relativo al centro de masa
+  v.cargue(star[j].GetVx(),star[j].GetVy(),star[j].GetVz());
+  norm_r=norma(r);
+  norm2_v=norma2(v);
+
+  //angular momentum
+  h=(r^v);
+  norm_h=norma(h);
+
+  //inclination
+  i=std::acos(h.z()/norm_h);
+
+  //eccentricity vector
+  e=((norm2_v-mu/norm_r)*r-(r*v)*v)/mu;
+  norm_e=norma(e);
+
+  //node line
+  n.cargue(-h.x(),h.y(),1);
+  norm_n=norma(n);
+
+  //RAAN
+  raan=std::acos(n.x()/norm_n);
+  if(n.y()<0)
+    raan=2*M_PI-raan;
+
+  //argument of perigee
+  aop=std::acos(n*e/(norm_n*norm_e));
+  if(e.z()<0)
+    aop=2*M_PI-aop;
+
+  //true anomaly
+  ta=std::acos(e*r/(norm_r*norm_e));
+  if(r*v<0)
+    ta=2*M_PI-ta;
+
+  //semi major axis
+  a=norm_r*(1+norm_e*std::cos(ta))/(1-norm_e*norm_e);
+
+  coes={a,norm_e,i,ta,aop,raan};
 }
