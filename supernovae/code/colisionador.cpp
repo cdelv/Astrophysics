@@ -1,6 +1,5 @@
 #include "header.h"
 
-const double G=1;
 
 void Colisionador::CalculeFuerzas(std::vector<Cuerpo> &star, Config &data){
   vector3D r21, cm;
@@ -30,7 +29,7 @@ void Colisionador::CalculeFuerzas(std::vector<Cuerpo> &star, Config &data){
 	    yes=1;
 	  }
 	
-	if(influ>data.R_influ && norma(star[j].V)>std::sqrt(2*G*(star[0].m+star[1].m)/influ) && yes==0) //si el fragmento se sale de la esfera de influencia borrarlo
+	if(influ>data.R_influ && norma(star[j].V)>std::sqrt(2*data.G*(star[0].m+star[1].m)/influ) && yes==0) //si el fragmento se sale de la esfera de influencia borrarlo
 	  {
 	    star.erase(star.begin() + j);
 	    j--;
@@ -38,10 +37,10 @@ void Colisionador::CalculeFuerzas(std::vector<Cuerpo> &star, Config &data){
 	  }
 	
 	if(yes==0) // si el fragmento colisiona o se escapa , no hay que calcular fuerzas
-	  CalculeFuerzaEntre(star[i], star[j]);
+	  CalculeFuerzaEntre(star[i], star[j], data.G);
       }
 }
-void Colisionador::CalculeFuerzaEntre(Cuerpo &Molecula1, Cuerpo &Molecula2){
+void Colisionador::CalculeFuerzaEntre(Cuerpo &Molecula1, Cuerpo &Molecula2, double G){
   vector3D r21=Molecula2.r-Molecula1.r;
   double d=norma(r21);  
   vector3D n= r21*(1.0/d);

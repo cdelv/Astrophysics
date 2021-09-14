@@ -13,7 +13,7 @@ void Cuerpo::Mueva_r(double dt, double coeficiente){
   r+=V*dt*coeficiente;
 }
 void Cuerpo::Mueva_V(double dt, double coeficiente){
-  V+=(F-dmdt)*dt*coeficiente/m;
+  V+=(F+dmdt)*dt*coeficiente/m;
   dmdt.cargue(0,0,0);
 }
 void Cuerpo::Add_m(double M, vector3D v){
@@ -23,7 +23,7 @@ void Cuerpo::Add_m(double M, vector3D v){
 }
 void Cuerpo::colide(double M, vector3D v)
 {
-  V=(m*V+M*v)/(m+M);
-  v.cargue(0,0,0);
+  //V=(m*V+M*v)/(m+M);
+  //v.cargue(0,0,0);
   Add_m(M,v);
 }

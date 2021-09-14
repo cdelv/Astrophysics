@@ -32,13 +32,13 @@ void Results(Config &data, std::vector <Cuerpo> &star, double t)
   fout.close();
   //COES estrella 1
   std::vector <double> coes;
-  rv2coes(star,coes,0);
+  rv2coes(star,coes,data.G,0);
   fout.open("data/COES1.dat", std::fstream::in | std::fstream::out | std::fstream::app);
   fout << t <<","<< coes[0] <<","<< coes[1] <<","<< coes[2] <<","<< coes[3] <<","<< coes[4] <<","<< coes[5] <<std::endl;
   fout.close();
   //COES estrella 2
   fout.open("data/COES2.dat", std::fstream::in | std::fstream::out | std::fstream::app);
-  rv2coes(star,coes,1);
+  rv2coes(star,coes,data.G,1);
   fout << t <<","<< coes[0] <<","<< coes[1] <<","<< coes[2] <<","<< coes[3] <<","<< coes[4] <<","<< coes[5] <<std::endl;
   fout.close();
 }
@@ -88,10 +88,10 @@ vector3D SMcenter(std::vector <Cuerpo> &star)
 {
   return (star[0].Getm()*star[0].Getr()+star[1].Getm()*star[1].Getr())/(star[0].Getm()+star[1].Getm());
 }
-void rv2coes(std::vector <Cuerpo> &star, std::vector <double> &coes, int j)
+void rv2coes(std::vector <Cuerpo> &star, std::vector <double> &coes, double G, int j)
 {
   vector3D c, h, r, v, e, n;
-  double i, raan, aop, ta, a, G=1, mu=G*(star[0].Getm()+star[1].Getm());
+  double i, raan, aop, ta, a, mu=G*(star[0].Getm()+star[1].Getm());
   double norm_r, norm2_v, norm_h, norm_e, norm_n;
   
   c=SMcenter(star);

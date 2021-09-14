@@ -1,0 +1,5 @@
+#Condiciones iniciales reales
+#Unidades de G
+#Distribuciones de energia y velocidad en la explocion
+#Correcta energia de explosion
+#Velcidad del centro de masa

@@ -10,5 +10,5 @@ void configure(char *argv[], Config &data)
   data.M_loss=std::atof(argv[6]);
   data.Exp_E=std::atof(argv[7]);
   data.TE=std::atof(argv[8]);
-  init_files();
+  data.G=std::atof(argv[9]);
 }

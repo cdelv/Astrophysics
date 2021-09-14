@@ -26,7 +26,7 @@ def plot_coes(ts,coes,dark=False,hours=False,days=False,show_plot=False,save_plo
 
 
     #plot true anomaly
-    axs[0,0].plot(ts,coes[:,3])
+    axs[0,0].plot(ts,coes[:,3]*(360/(2*np.pi)))
     axs[0,0].set_title('True anomaly vs.Time')
     axs[0,0].grid(True)
     axs[0,0].set_ylabel('Angle (degrees)')
@@ -35,7 +35,7 @@ def plot_coes(ts,coes,dark=False,hours=False,days=False,show_plot=False,save_plo
     axs[1,0].plot(ts,coes[:,0])
     axs[1,0].set_title('Semi Major Axis vs.Time')
     axs[1,0].grid(True)
-    axs[1,0].set_ylabel('Semi Major Axis (km)')
+    axs[1,0].set_ylabel('Semi Major Axis (km??)')
     axs[1,0].set_xlabel(xlabel)
 
     #plot eccentricity
@@ -49,7 +49,7 @@ def plot_coes(ts,coes,dark=False,hours=False,days=False,show_plot=False,save_plo
     axs[0,2].grid(True)
 
     #plot inclination
-    axs[1,1].plot(ts,coes[:,2])
+    axs[1,1].plot(ts,coes[:,2]*(360/(2*np.pi)))
     axs[1,1].set_title('Inclination vs.Time')
     axs[1,1].grid(True)
     axs[1,1].set_ylabel('Angle (degrees)')

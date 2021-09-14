@@ -7,6 +7,7 @@ FRAMES=$(shell sed -n 5p data/parameters.txt | tr -d -c 0-9.-)
 MASSLOSS=$(shell sed -n 6p data/parameters.txt | tr -d -c 0-9.-)
 ENERGY=$(shell sed -n 7p data/parameters.txt | tr -d -c 0-9.-)
 TE=$(shell sed -n 8p data/parameters.txt | tr -d -c 0-9.-)
+G=$(shell sed -n 9p data/parameters.txt | tr -d -c 0-9.-)
 
 #Compiling parameters
 CXX=g++
@@ -22,7 +23,7 @@ DEPENDENCIES=$(SOURCES:code/%.cpp=objects/%.o)
 all: main.x
 	@echo -e '\n'
 	@echo -e 'Running program ... \n'
-	@$(RUN)$< $(T) $(DT) $(FRAGMENTS) $(R) $(FRAMES) $(MASSLOSS) $(ENERGY) $(TE)
+	@$(RUN)$< $(T) $(DT) $(FRAGMENTS) $(R) $(FRAMES) $(MASSLOSS) $(ENERGY) $(TE) $(G)
 	@echo -e '\n'
 	@echo -e '\nDone!'
 

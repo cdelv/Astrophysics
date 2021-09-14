@@ -20,6 +20,7 @@ struct Config
   double M_loss;
   double Exp_E;
   double TE;
+  double G;
 };
 
 //Vector.cpp
@@ -77,6 +78,7 @@ public:
   double GetVy(void){return V.y();};
   double GetVz(void){return V.z();};
   double GetV2(void){return norma2(V);};
+  vector3D GetV(void){return V;};
   double GetFx(void){return F.x();};
   double GetFy(void){return F.y();};
   double GetFz(void){return F.z();};
@@ -94,7 +96,7 @@ private:
 
 public:
   void CalculeFuerzas(std::vector<Cuerpo> &star, Config &data);
-  void CalculeFuerzaEntre(Cuerpo &Molecula1, Cuerpo &Molecula2);
+  void CalculeFuerzaEntre(Cuerpo &Molecula1, Cuerpo &Molecula2, double G);
 };
 
 //configure.cpp
@@ -117,7 +119,7 @@ double SKenergy(std::vector <Cuerpo> &star);
 double SPenergy(std::vector <Cuerpo> &star);
 vector3D Mcenter(std::vector <Cuerpo> &star);
 vector3D SMcenter(std::vector <Cuerpo> &star);
-void rv2coes(std::vector <Cuerpo> &star, std::vector <double> &coes, int j);
+void rv2coes(std::vector <Cuerpo> &star, std::vector <double> &coes, double G, int j);
 
 
 //tools.cpp
