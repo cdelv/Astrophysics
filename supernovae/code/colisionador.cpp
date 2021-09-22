@@ -23,13 +23,13 @@ void Colisionador::CalculeFuerzas(std::vector<Cuerpo> &star, Config &data){
 	
 	if (s>0) //colision entre fragmentos y estrellas
 	  {
-	    star[i].colide(star[j].m,star[j].V);
+	    star[i].collide(star[j].m,star[j].V);
 	    star.erase(star.begin() + j);
 	    j--;
 	    yes=1;
 	  }
 	
-	if(influ>data.R_influ && norma(star[j].V)>std::sqrt(2*data.G*(star[0].m+star[1].m)/influ) && yes==0) //si el fragmento se sale de la esfera de influencia borrarlo
+	if(data.sphere && influ>data.R_influ && norma(star[j].V)>std::sqrt(2*data.G*(star[0].m+star[1].m)/influ) && yes==0) //si el fragmento se sale de la esfera de influencia borrarlo
 	  {
 	    star.erase(star.begin() + j);
 	    j--;
@@ -43,8 +43,7 @@ void Colisionador::CalculeFuerzas(std::vector<Cuerpo> &star, Config &data){
 void Colisionador::CalculeFuerzaEntre(Cuerpo &Molecula1, Cuerpo &Molecula2, double G){
   vector3D r21=Molecula2.r-Molecula1.r;
   double d=norma(r21);  
-  vector3D n= r21*(1.0/d);
-  vector3D F= -G*Molecula1.m*Molecula2.m*std::pow(d,-2)*n;
+  vector3D F= -G*Molecula1.m*Molecula2.m*std::pow(d,-3)*r21;
 
   Molecula2.AdicioneFuerza(F); Molecula1.AdicioneFuerza(-1.0*F); //3 ley de Newton
 }

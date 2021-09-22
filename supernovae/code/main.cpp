@@ -9,6 +9,9 @@ int main(int argc, char *argv[])
   Initialize_system(data,star);
  
   Propagate(data,star);
+
+  CMVelocity();
+  Energy_derivative();
   
   return 0;
 }

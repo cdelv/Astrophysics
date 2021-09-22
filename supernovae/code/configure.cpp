@@ -11,4 +11,9 @@ void configure(char *argv[], Config &data)
   data.Exp_E=std::atof(argv[7]);
   data.TE=std::atof(argv[8]);
   data.G=std::atof(argv[9]);
+
+  if(std::string(argv[10])=="true")
+    data.sphere=true;
+  else
+    data.sphere=false;
 }

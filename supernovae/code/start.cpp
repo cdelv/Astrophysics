@@ -32,9 +32,6 @@ void init_files(void)
   fout.open("data/Baricenter.dat");
   fout.close();
 
-  fout.open("data/COES1.dat");
+  fout.open("data/COES.dat");
   fout.close();
-
-  fout.open("data/COES2.dat");
-  fout.close(); 
 }

@@ -1,9 +1,10 @@
-5000			#t
+1000			#t
 0.001			#dt
-1000			#num fragmentos
+20			#num fragmentos
 1000			#r esfera de influencia
 501			#numero de frames
 50			#porcentaje de masa que pierde la estrella
-250			#Energia de explosion
+350			#Energia de explosion
 100			#t de la explosion
 1			#G
+false			#activar esfera de influencia

@@ -8,22 +8,24 @@ MASSLOSS=$(shell sed -n 6p data/parameters.txt | tr -d -c 0-9.-)
 ENERGY=$(shell sed -n 7p data/parameters.txt | tr -d -c 0-9.-)
 TE=$(shell sed -n 8p data/parameters.txt | tr -d -c 0-9.-)
 G=$(shell sed -n 9p data/parameters.txt | tr -d -c 0-9.-)
+YES=$(shell sed -n 10p data/parameters.txt | cut -d '#' -f 1)
 
 #Compiling parameters
 CXX=g++
-FLAGS= -std=c++17 -g
+XXFLAGS=-std=c++17 -g -O3
+SANITFLAGS =-fsanitize=address -fsanitize=leak -fsanitize=undefined
 LIBS=
-#RUN=mpirun --use-hwthread-cpus -np $(PROCCESORS) ./
 RUN=./
 SOURCES=$(wildcard code/*.cpp)
 DEPENDENCIES=$(SOURCES:code/%.cpp=objects/%.o)
+FLAGS = $(XXFLAGS)
 
 .PHONY: all clean oclean graph movie
 
 all: main.x
 	@echo -e '\n'
 	@echo -e 'Running program ... \n'
-	@$(RUN)$< $(T) $(DT) $(FRAGMENTS) $(R) $(FRAMES) $(MASSLOSS) $(ENERGY) $(TE) $(G)
+	@$(RUN)$< $(T) $(DT) $(FRAGMENTS) $(R) $(FRAMES) $(MASSLOSS) $(ENERGY) $(TE) $(G) $(YES)
 	@echo -e '\n'
 	@echo -e '\nDone!'
 
@@ -46,6 +48,8 @@ graph:
 	@gnuplot scripts/Senergy.gp
 	@gnuplot scripts/Tenergy.gp
 	@python3 scripts/coes.py
+	@gnuplot scripts/Ederivative.gp
+	@gnuplot scripts/CMvel.gp
 	@echo -e 'Done!\n'
 
 clean:

@@ -21,6 +21,7 @@ struct Config
   double Exp_E;
   double TE;
   double G;
+  bool sphere;
 };
 
 //Vector.cpp
@@ -60,15 +61,16 @@ class vector3D{
 //cuerpo_class.cpp
 class Cuerpo{
 private:
-  vector3D  r, V, F, dmdt;   double m, R, rho=1;
+  vector3D  r, V, F;   double m, R, rho=1;
 public:
   Cuerpo(double x0, double y0, double z0, double Vx0, double Vy0, double Vz0, double m0,double R0);
   void BorreFuerza(void){F.cargue(0,0,0);};
   void AdicioneFuerza(vector3D F0){F+=F0;};
   void Mueva_r(double dt, double coeficiente);
   void Mueva_V(double dt, double coeficiente);
-  void colide(double M, vector3D v);
-  void Add_m(double M, vector3D v);
+  void collide(double dM, vector3D v);
+  void expell(double dM, vector3D v);
+  void Add_m(double M);
   void Edit_r(double r){R=r;};
   double Getx(void){return r.x();};
   double Gety(void){return r.y();}; 
@@ -114,12 +116,14 @@ void explode(Config &data, std::vector <Cuerpo> &star);
 //results.cpp
 void Results(Config &data, std::vector <Cuerpo> &star, double t);
 double Kenergy(std::vector <Cuerpo> &star);
-double Penergy(std::vector <Cuerpo> &star);
+double Penergy(std::vector <Cuerpo> &star,Config &data);
 double SKenergy(std::vector <Cuerpo> &star);
-double SPenergy(std::vector <Cuerpo> &star);
+double SPenergy(std::vector <Cuerpo> &star,Config &data);
 vector3D Mcenter(std::vector <Cuerpo> &star);
 vector3D SMcenter(std::vector <Cuerpo> &star);
 void rv2coes(std::vector <Cuerpo> &star, std::vector <double> &coes, double G, int j);
+void CMVelocity(void);
+void Energy_derivative(void);
 
 
 //tools.cpp
