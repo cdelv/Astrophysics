@@ -3,14 +3,17 @@
 
 void Colisionador::CalculeFuerzas(std::vector<Cuerpo> &star, Config &data){
   vector3D r21, cm;
-  double d, s, influ;
+  double d, s, influ, mt=0;
   //borrar todas las fuerzas
   for(int i=0; i<star.size();i++)
     star[i].BorreFuerza();
+  
+  for(auto i: star) //masa total del sistema
+    mt+=i.Getm();
+  cm=Mcenter(star); //centro de masa del sistema
 
   //Calcular las fuerzas entre las estrellas y los fragmentos
   //Los fragmentos no se hacen fuerza entre ellos (por ahora)
-  
   for(int i=0; i<2; i++)
     for(int j=i+1; j<star.size(); j++)
       {
@@ -18,7 +21,6 @@ void Colisionador::CalculeFuerzas(std::vector<Cuerpo> &star, Config &data){
 	r21=star[j].r-star[i].r;
 	d=norma(r21);
 	s=(star[i].R+star[j].R)-d; //distancia de interpenetracion
-	cm=(star[0].r*star[0].m+star[1].r*star[1].m)/(star[0].m+star[1].m); //centro de masa de las estrellas
 	influ=norma(cm-star[j].r); //distancia al centro de masa
 	
 	if (s>0) //colision entre fragmentos y estrellas
@@ -29,7 +31,7 @@ void Colisionador::CalculeFuerzas(std::vector<Cuerpo> &star, Config &data){
 	    yes=1;
 	  }
 	
-	if(data.sphere && influ>data.R_influ && norma(star[j].V)>std::sqrt(2*data.G*(star[0].m+star[1].m)/influ) && yes==0) //si el fragmento se sale de la esfera de influencia borrarlo
+	if(data.sphere && influ>data.R_influ && star[j].GetV2()>2*data.G*mt/influ && yes==0) //si el fragmento se sale de la esfera de influencia borrarlo
 	  {
 	    star.erase(star.begin() + j);
 	    j--;
