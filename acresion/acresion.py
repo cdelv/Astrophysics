@@ -15,6 +15,8 @@ def main():
 
 	#Initial conditions   r, phi.
 	z0=[50,0]
+	tmax = 20
+	steps = 100
 
 	#Mass of the particle
 	m = 1 
@@ -30,7 +32,7 @@ def main():
 
 	#Create the metric tensor
 	Metric_Tensor=Create_Metric_Tensor(M)
-	up_Metric_Tensor = Metric_Tensor.change_config('uu')
+	up_Metric_Tensor = Metric_Tensor.change_config('uu') #metric tensor with 2 up indices
 
 	print(Metric_Tensor)
 	
@@ -38,6 +40,7 @@ def main():
 	Riemann_Tensor = Create_Riemann_Tensor(Metric_Tensor)
 
 	## We are always in the plain. Evaluate theta = pi/2 to speed up the code
+	## We are not intrested on the complete tensor, just some slices
 	R_30 = Riemann_Tensor[3][0].subs(coord[1], math.pi/2)
 	R_31 = Riemann_Tensor[3][1].subs(coord[1], math.pi/2)
 	R_10 = Riemann_Tensor[1][0].subs(coord[1], math.pi/2)
@@ -45,15 +48,22 @@ def main():
 	Metric_Tensor = Metric_Tensor.subs(coord[1], math.pi/2)
 	up_Metric_Tensor = up_Metric_Tensor.subs(coord[1], math.pi/2)
 
+	## Calculate analitic expression of gama and its derivative
+	gamma, Part_gamma = calc_gamma(Metric_Tensor)
+
+	### Calculate analitic Metric partial derivatives
+	Part_g00 = sympy.diff(Metric_Tensor[0][0], coord[0])
+	Part_g33 = sympy.diff(Metric_Tensor[3][3], coord[0])
+
 	#Total Angular momentum
 	J = j + s
 
 	#time span
-	t=np.linspace(0,10,1000) #start, finish, n of points
+	t=np.linspace(0,tmax,steps) #start, finish, n of points
 
 	#Solve ODE
 	z = odeint(dif_equation, z0, t, args=(Metric_Tensor, up_Metric_Tensor, 
-		R_30, R_31, R_10, R_13, m, E, s, J ))
+		R_30, R_31, R_10, R_13, m, E, s, J, gamma, Part_gamma, Part_g00, Part_g33))
 
 	#Plot trayectory
 	plot_trayectory(z,t) #r vs phi
@@ -71,27 +81,27 @@ def Create_Metric_Tensor(M=10):
 
 	########### premade schwarzschild metric #################### c, G, a, M
 	Metric = predefined.janis_newman_winicour.JanisNewmanWinicour(1, 1, 1, M)
-	return Metric  ### Metric_{ab}  a, b in (0 to 4), covariant form
+	return Metric  ### Metric_{ab}  a, b in (0 to 4), 2 indices down
 
 def Create_Riemann_Tensor(Metric):
-	#### Calculate Riemann Tensor #########
+	#### Calculate Riemann Tensor from the metric tensor #########
 	Riemann = RiemannCurvatureTensor.from_metric(Metric)
 	Riemann.tensor()
 	return Riemann
 
 def calc_gamma(Metric):
 
+	#calculate analitic expresion of gamma and its derivative
 	gamma = sympy.sqrt(-Metric[1][1]*Metric[2][2]*Metric[3][3])
-	part_gamma = sympy.diff(gamma, coord[0])
+	Part_gamma = sympy.diff(gamma, coord[0])
 
-	return gamma, part_gamma
+	return gamma, Part_gamma
 
-def calc_momentum(Metric, up_Metric, gamma, Part_g00, Part_g33, m, E, s, J):
+def calc_momentum(up_Metric, gamma, Part_g00, Part_g33, m, E, s, J):
 
+	### Convert tu number components of metric tensor
 	g_up_00 = sympy.N(up_Metric[0][0])
-
 	g_up_11 = sympy.N(up_Metric[1][1])
-
 	g_up_33 = sympy.N(up_Metric[3][3])
 
 	P0 = -(2*m*gamma*(2*m*gamma*E+s*J*Part_g00))/(4*m**2*gamma**2+s**2*Part_g00*Part_g33)
@@ -138,19 +148,11 @@ def calc_dpdt(R_10, R_13, S, P, s, m, gamma, Part_gamma, drdt):
 
 	return derivative
 
-def dif_equation(z,t,Metric, up_Metric, R_30, R_31, R_10, R_13, m, E, s, J):
+def dif_equation(z,t,Metric, up_Metric, R_30, R_31, R_10, R_13, m, E, s, J, gamma, Part_gamma, Part_g00, Part_g33):
 	r=z[0]
 	phi=z[1]
 
-	### Calculate gamma and gamma derivative before evaluating
-	gamma, Part_gamma = calc_gamma(Metric)
-
-	### Evaluate Metric partial derivatives before evaluating
-	Part_g00 = sympy.N(sympy.diff(Metric[0][0], coord[0]).subs([(coord[0], r), (coord[2], phi), (coord[3], t)]))
-
-	Part_g33 = sympy.N(sympy.diff(Metric[3][3], coord[0]).subs([(coord[0], r), (coord[2], phi), (coord[3], t)]))
-
-	### Evaluate the metric tensor and store it in an ndarray
+	### Evaluate the metric tensors and store them in an ndarray
 	Metric = Metric.subs([(coord[0], r), (coord[2], phi), (coord[3], t)])
 	up_Metric = up_Metric.subs([(coord[0], r), (coord[2], phi), (coord[3], t)])
 
@@ -164,14 +166,19 @@ def dif_equation(z,t,Metric, up_Metric, R_30, R_31, R_10, R_13, m, E, s, J):
 	gamma = sympy.N(gamma.subs([(coord[0], r), (coord[2], phi), (coord[3], t)]))
 	Part_gamma = sympy.N(Part_gamma.subs([(coord[0], r), (coord[2], phi), (coord[3], t)]))
 
-	### Calculate momentum
-	P = calc_momentum(Metric, up_Metric, gamma, Part_g00, Part_g33, m, E, s, J)
+	### Evaluate metric tensor partial derivatives
+	Part_g00 = sympy.N(Part_g00.subs([(coord[0], r), (coord[2], phi), (coord[3], t)]))
+	Part_g33 = sympy.N(Part_g33.subs([(coord[0], r), (coord[2], phi), (coord[3], t)]))
 
-	### Calculate components of the spin tensor
+	### Calculate momentum
+	P = calc_momentum(up_Metric, gamma, Part_g00, Part_g33, m, E, s, J)
+
+	### Calculate non_zero components of the spin tensor
 	S = calc_spin_tensor(gamma, P, m, s)
 
-	drdt = calc_drdt(R_30, R_31, S, P, s, m, gamma, Part_gamma)
-	dpdt = calc_dpdt(R_30, R_31, S, P, s, m, gamma, Part_gamma, drdt)
+	### Calculate derivatives 
+	drdt = calc_drdt(R_30, R_31, S, P, s, m, gamma, Part_gamma)        # r
+	dpdt = calc_dpdt(R_30, R_31, S, P, s, m, gamma, Part_gamma, drdt)  #phi
 
 	return drdt, dpdt
 
@@ -181,6 +188,7 @@ def plot_trayectory(z,t):
 	x = []
 	y = []
 
+	## comvert results to cartesian coordinates for the plot
 	for i in range(len(r)):
 		x.append(r[i]*math.cos(phi[i]))
 		y.append(r[i]*math.sin(phi[i]))
