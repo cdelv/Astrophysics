@@ -100,15 +100,15 @@ def calc_gamma(Metric):
 def calc_momentum(up_Metric, gamma, Part_g00, Part_g33, m, E, s, J):
 
 	### Convert tu number components of metric tensor
-	g_up_00 = sympy.N(up_Metric[0][0])
-	g_up_11 = sympy.N(up_Metric[1][1])
-	g_up_33 = sympy.N(up_Metric[3][3])
+	g_up_00 = up_Metric[0][0]
+	g_up_11 = up_Metric[1][1]
+	g_up_33 = up_Metric[3][3]
 
 	P0 = -(2*m*gamma*(2*m*gamma*E+s*J*Part_g00))/(4*m**2*gamma**2+s**2*Part_g00*Part_g33)
 	P3 = (2*m*gamma*(2*m*gamma*J+s*E*Part_g33))/(4*m**2*gamma**2+s**2*Part_g00*Part_g33)
 	P1_2 = -(m**2+g_up_00*P0**2+g_up_33*P3**2)/(g_up_11)
 
-	return sympy.N(P0), math.sqrt(sympy.N(P1_2)), sympy.N(P3)
+	return P0, math.sqrt(P1_2), P3
 	
 def calc_spin_tensor(gamma, P, m, s):
 	num = -s/(m*gamma)
@@ -163,12 +163,12 @@ def dif_equation(z,t,Metric, up_Metric, R_30, R_31, R_10, R_13, m, E, s, J, gamm
 	R_13 = R_30.subs([(coord[0], t), (coord[1], r), (coord[3], phi)])
 
 	### Evaluate gamma and gamma derivative
-	gamma = sympy.N(gamma.subs([(coord[0], t), (coord[1], r), (coord[3], phi)]))
-	Part_gamma = sympy.N(Part_gamma.subs([(coord[0], t), (coord[1], r), (coord[3], phi)]))
+	gamma = gamma.subs([(coord[0], t), (coord[1], r), (coord[3], phi)])
+	Part_gamma = Part_gamma.subs([(coord[0], t), (coord[1], r), (coord[3], phi)])
 
 	### Evaluate metric tensor partial derivatives
-	Part_g00 = sympy.N(Part_g00.subs([(coord[0], t), (coord[1], r), (coord[3], phi)]))
-	Part_g33 = sympy.N(Part_g33.subs([(coord[0], t), (coord[1], r), (coord[3], phi)]))
+	Part_g00 = Part_g00.subs([(coord[0], t), (coord[1], r), (coord[3], phi)])
+	Part_g33 = Part_g33.subs([(coord[0], t), (coord[1], r), (coord[3], phi)])
 
 	### Calculate momentum
 	P = calc_momentum(up_Metric, gamma, Part_g00, Part_g33, m, E, s, J)
