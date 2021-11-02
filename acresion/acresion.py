@@ -71,13 +71,15 @@ def main():
 def Create_Metric_Tensor(M=10):
 	#### Define problem metric #########
 	#### schwarzschild metric ##########
-	#list2d = [[0 for i in range(4)] for i in range(4)]
-	#list2d[0][0] = -(1-2*M/coord[0])
-	#list2d[1][1] = 1 / (1 - 2*M / coord[0])
-	#list2d[2][2] = coord[0]**2
-	#list2d[3][3] = coord[0]**2*sympy.sin(coord[1])**2
-	#Metric = MetricTensor(list2d, coord)
-	#Metric.tensor()
+	'''
+	list2d = [[0 for i in range(4)] for i in range(4)]
+	list2d[0][0] = -(1-2*M/coord[1])
+	list2d[1][1] = 1 / (1 - 2*M / coord[1])
+	list2d[2][2] = coord[1]**2
+	list2d[3][3] = coord[1]**2*sympy.sin(coord[2])**2
+	Metric = MetricTensor(list2d, coord)
+	Metric.tensor()
+	'''
 
 	########### premade schwarzschild metric #################### c, G, a, M
 	Metric = predefined.janis_newman_winicour.JanisNewmanWinicour(1, 1, 1, M)
