@@ -37,7 +37,8 @@ def main():
 	print(Metric_Tensor)
 	
 	#Create the Riemann curvature tensor from the metric
-	Riemann_Tensor = Create_Riemann_Tensor(Metric_Tensor)
+	Riemann_Tensor = Create_Riemann_Tensor(Metric_Tensor) #Make Riemann type (1,3)
+	Riemann_Tensor = Riemann_Tensor.change_config('llll', Metric_Tensor)  #Make Riemann type (0,4)
 
 	## We are always in the plain. Evaluate theta = pi/2 to speed up the code
 	## We are not intrested on the complete tensor, just some slices
@@ -94,8 +95,8 @@ def Create_Riemann_Tensor(Metric):
 def calc_gamma(Metric):
 
 	#calculate analitic expresion of gamma and its derivative respec to r
-	gamma = sympy.sqrt(-Metric[1][1]*Metric[2][2]*Metric[3][3])
-	Part_gamma = sympy.diff(gamma, coord[1])
+	gamma = sympy.simplify(sympy.sqrt(-Metric[1][1]*Metric[2][2]*Metric[3][3]))
+	Part_gamma = sympy.simplify(sympy.diff(gamma, coord[1]))
 
 	return gamma, Part_gamma
 
