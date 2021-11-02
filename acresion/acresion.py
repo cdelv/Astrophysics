@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import sympy
 from einsteinpy.symbolic import MetricTensor, RiemannCurvatureTensor, predefined
 
-coord = sympy.symbols('r theta phi t')
+coord = sympy.symbols('t r theta phi')
 
 def main():
 
@@ -41,19 +41,19 @@ def main():
 
 	## We are always in the plain. Evaluate theta = pi/2 to speed up the code
 	## We are not intrested on the complete tensor, just some slices
-	R_30 = Riemann_Tensor[3][0].subs(coord[1], math.pi/2)
-	R_31 = Riemann_Tensor[3][1].subs(coord[1], math.pi/2)
-	R_10 = Riemann_Tensor[1][0].subs(coord[1], math.pi/2)
-	R_13 = Riemann_Tensor[1][3].subs(coord[1], math.pi/2)
-	Metric_Tensor = Metric_Tensor.subs(coord[1], math.pi/2)
-	up_Metric_Tensor = up_Metric_Tensor.subs(coord[1], math.pi/2)
+	R_30 = Riemann_Tensor[3][0].subs(coord[2], math.pi/2)
+	R_31 = Riemann_Tensor[3][1].subs(coord[2], math.pi/2)
+	R_10 = Riemann_Tensor[1][0].subs(coord[2], math.pi/2)
+	R_13 = Riemann_Tensor[1][3].subs(coord[2], math.pi/2)
+	Metric_Tensor = Metric_Tensor.subs(coord[2], math.pi/2)
+	up_Metric_Tensor = up_Metric_Tensor.subs(coord[2], math.pi/2)
 
-	## Calculate analitic expression of gama and its derivative
+	## Calculate analitic expression of gama and its derivative respect to r
 	gamma, Part_gamma = calc_gamma(Metric_Tensor)
 
-	### Calculate analitic Metric partial derivatives
-	Part_g00 = sympy.diff(Metric_Tensor[0][0], coord[0])
-	Part_g33 = sympy.diff(Metric_Tensor[3][3], coord[0])
+	### Calculate analitic Metric partial derivatives respect to r
+	Part_g00 = sympy.diff(Metric_Tensor[0][0], coord[1])
+	Part_g33 = sympy.diff(Metric_Tensor[3][3], coord[1])
 
 	#Total Angular momentum
 	J = j + s
@@ -91,9 +91,9 @@ def Create_Riemann_Tensor(Metric):
 
 def calc_gamma(Metric):
 
-	#calculate analitic expresion of gamma and its derivative
+	#calculate analitic expresion of gamma and its derivative respec to r
 	gamma = sympy.sqrt(-Metric[1][1]*Metric[2][2]*Metric[3][3])
-	Part_gamma = sympy.diff(gamma, coord[0])
+	Part_gamma = sympy.diff(gamma, coord[1])
 
 	return gamma, Part_gamma
 
@@ -153,22 +153,22 @@ def dif_equation(z,t,Metric, up_Metric, R_30, R_31, R_10, R_13, m, E, s, J, gamm
 	phi=z[1]
 
 	### Evaluate the metric tensors and store them in an ndarray
-	Metric = Metric.subs([(coord[0], r), (coord[2], phi), (coord[3], t)])
-	up_Metric = up_Metric.subs([(coord[0], r), (coord[2], phi), (coord[3], t)])
+	Metric = Metric.subs([(coord[0], t), (coord[1], r), (coord[3], phi)])
+	up_Metric = up_Metric.subs([(coord[0], t), (coord[1], r), (coord[3], phi)])
 
 	### Evaluate Riemann tensor Slices
-	R_30 = R_30.subs([(coord[0], r), (coord[2], phi), (coord[3], t)])
-	R_31 = R_30.subs([(coord[0], r), (coord[2], phi), (coord[3], t)])
-	R_10 = R_30.subs([(coord[0], r), (coord[2], phi), (coord[3], t)])
-	R_13 = R_30.subs([(coord[0], r), (coord[2], phi), (coord[3], t)])
+	R_30 = R_30.subs([(coord[0], t), (coord[1], r), (coord[3], phi)])
+	R_31 = R_30.subs([(coord[0], t), (coord[1], r), (coord[3], phi)])
+	R_10 = R_30.subs([(coord[0], t), (coord[1], r), (coord[3], phi)])
+	R_13 = R_30.subs([(coord[0], t), (coord[1], r), (coord[3], phi)])
 
 	### Evaluate gamma and gamma derivative
-	gamma = sympy.N(gamma.subs([(coord[0], r), (coord[2], phi), (coord[3], t)]))
-	Part_gamma = sympy.N(Part_gamma.subs([(coord[0], r), (coord[2], phi), (coord[3], t)]))
+	gamma = sympy.N(gamma.subs([(coord[0], t), (coord[1], r), (coord[3], phi)]))
+	Part_gamma = sympy.N(Part_gamma.subs([(coord[0], t), (coord[1], r), (coord[3], phi)]))
 
 	### Evaluate metric tensor partial derivatives
-	Part_g00 = sympy.N(Part_g00.subs([(coord[0], r), (coord[2], phi), (coord[3], t)]))
-	Part_g33 = sympy.N(Part_g33.subs([(coord[0], r), (coord[2], phi), (coord[3], t)]))
+	Part_g00 = sympy.N(Part_g00.subs([(coord[0], t), (coord[1], r), (coord[3], phi)]))
+	Part_g33 = sympy.N(Part_g33.subs([(coord[0], t), (coord[1], r), (coord[3], phi)]))
 
 	### Calculate momentum
 	P = calc_momentum(up_Metric, gamma, Part_g00, Part_g33, m, E, s, J)
@@ -188,7 +188,7 @@ def plot_trayectory(z,t):
 	x = []
 	y = []
 
-	## comvert results to cartesian coordinates for the plot
+	## convert results to cartesian coordinates for the plot
 	for i in range(len(r)):
 		x.append(r[i]*math.cos(phi[i]))
 		y.append(r[i]*math.sin(phi[i]))
