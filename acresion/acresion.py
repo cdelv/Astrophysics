@@ -82,7 +82,7 @@ def Create_Metric_Tensor(M=10):
 	Metric.tensor()
 	'''
 
-	########### premade schwarzschild metric #################### c, G, a, M
+	########### Premade schwarzschild metric #################### c, G, a, M
 	Metric = predefined.janis_newman_winicour.JanisNewmanWinicour(1, 1, 1, M)
 	return Metric  ### Metric_{ab}  a, b in (0 to 4), 2 indices down
 
@@ -94,8 +94,8 @@ def Create_Riemann_Tensor(Metric):
 
 def calc_gamma(Metric):
 
-	#calculate analitic expresion of gamma and its derivative respec to r
-	gamma = sympy.simplify(sympy.sqrt(-Metric[1][1]*Metric[2][2]*Metric[3][3]))
+	#Calculates the analitic expresion of gamma and its derivative w.r.t. to r
+	gamma = sympy.simplify(sympy.sqrt(-Metric[0][0]*Metric[1][1]*Metric[3][3]))
 	Part_gamma = sympy.simplify(sympy.diff(gamma, coord[1]))
 
 	return gamma, Part_gamma
