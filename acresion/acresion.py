@@ -2,33 +2,53 @@ import numpy as np
 from scipy.integrate import odeint
 import math
 import matplotlib.pyplot as plt
+import sys
+import os
+import importlib
 
 import sympy
 from einsteinpy.symbolic import MetricTensor, RiemannCurvatureTensor, predefined
+
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKCYAN = '\033[96m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
 
 coord = sympy.symbols('t r theta phi')
 
 def main():
 
+	if len(sys.argv) != 2:
+		file_template()
+		sys.exit("Usage: python acresion.py parameters.txt")
+		
+	data = load_file(sys.argv[1])
+
 	##### black whole mass
-	M = 1000
+	M = data[3]
 
 	#Initial conditions   r, phi.
-	z0=[50,0]
-	tmax = 20
-	steps = 100
+	z0=[data[0],data[1]]
+	tmax = data[7]
+	steps = data[8]
 
 	#Mass of the particle
-	m = 1 
+	m = data[4] 
 
 	#Energy of the particle
-	E = 10
+	E = data[2]
 
 	#Orbital angular momentum
-	j = 1
+	j = data[5]
 
 	#Spin Angular momentum
-	s = 1
+	s = data[6]
 
 	#Create the metric tensor
 	Metric_Tensor=Create_Metric_Tensor(M)
@@ -82,7 +102,7 @@ def Create_Metric_Tensor(M=10):
 	Metric.tensor()
 	'''
 
-	########### Premade schwarzschild metric example #################### c, G, a, M
+	########## Premade schwarzschild metric example ############# c, G, a, M
 	Metric = predefined.janis_newman_winicour.JanisNewmanWinicour(1, 1, 1, M)
 	return Metric  ### Metric_{ab}  a, b in (0 to 4), 2 indices down
 
@@ -205,6 +225,64 @@ def plot_trayectory(z,t):
 
 	plt.plot(t,np.asarray(y))
 	plt.show()
+
+def load_file(path):
+	if not os.path.isfile(path):
+		print('Parameters file not found.')
+		exit()
+
+	module_name = os.path.basename(path).replace('-', '_')
+	spec = importlib.util.spec_from_loader(
+	    module_name,
+	    importlib.machinery.SourceFileLoader(module_name, path)
+	)
+	module = importlib.util.module_from_spec(spec)
+	spec.loader.exec_module(module)
+	sys.modules[module_name] = module
+	check_file(module)
+	return [module.r0, module.phi0, module.E, module.M, module.m, module.j, module.s, module.tmax, module.steps]
+
+def check_file(data):
+	variables = {'r0', 'phi0', 'E', 'M','m', 'j', 's', 'tmax', 'steps'}
+	if not variables.issubset(dir(data)):
+		for i in variables:
+			if not {i}.issubset(dir(data)):
+				print(i,' variable is missing.')
+		file_template()
+		exit()
+
+def file_template():
+	print('You have to pass a file with the program parameters. Take a look to the file template.txt tha was just created.')
+	print('Edit template.txt and add the parameters you want. Do not change variable names.')
+	print('In case of an error template.txt will be overwritten. Please use a different name for your working file.')
+
+
+	with open('template.txt', 'w') as f:
+		f.write('''#######################
+	# Initial conditions
+#######################
+r0 = 50 
+phi0 = 0
+
+#######################
+# Program parameters
+#######################
+M = 100 #Black Hole mass
+m = 1   #Particle mass
+E = 5   #Energy
+j = 1   #Angular momentum
+s = 1   #Spin
+
+#######################
+# Propagation
+#######################
+tmax = 50        #Maximun time
+steps = 100000   #Number of steps
+
+#######################
+#   Metric
+#######################''')
+	f.close()
 
 
 if __name__ == '__main__':

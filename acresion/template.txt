@@ -1,0 +1,24 @@
+#######################
+# Initial conditions
+#######################
+r0 = 50 
+phi0 = 0
+
+#######################
+# Program parameters
+#######################
+M = 100 #Black Hole mass
+m = 1   #Particle mass
+E = 5   #Energy
+j = 1   #Angular momentum
+s = 1   #Spin
+
+#######################
+# Propagation
+#######################
+tmax = 50        #Maximun time
+steps = 100000   #Number of steps
+
+#######################
+#   Metric
+#######################
