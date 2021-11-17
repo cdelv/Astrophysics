@@ -52,8 +52,12 @@ graph:
 	@gnuplot scripts/CMvel.gp
 	@echo -e 'Done!\n'
 
+Gif:
+	ffmpeg   -framerate 60   -pattern_type glob   -i 'Animation/Supernovae.*.png'   -r 15   -vf scale=512:-1   Supernovae.gif ;
+
 clean:
 	@rm -rf *.x results/* code/*~ data/*~ scripts/*~ main.x
 
 oclean:
 	@rm -rf objects/*.o
+	
