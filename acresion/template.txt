@@ -22,3 +22,26 @@ steps = 100000   #Number of steps
 #######################
 #   Metric
 #######################
+#Enter components in sympy compatible notation. Remember only acepted coordinates are ('t r theta phi')
+#Analitic constants are not admited (yet)
+#If True, uses the components pass by the user. If false, calculates tensor with ----- (in progress)
+User_tensor = True
+#######################
+#The example for schwarzschild metric is given
+#######################
+#Metric tensor components must be in configuration [-1,1,1,1]. 
+#These 3 components must have both indices down
+g00 = '-(1-2*'+str(M)+'/r)'
+g11 = '(1-2*'+str(M)+'/r)**(-1)'
+g33 = 'r**2*sin(theta)**2'
+#These 3 componets must have both indices up
+g_up_00 = '-(1-2*'+str(M)+'/r)**(-1)'
+g_up_11 = '(1-2*'+str(M)+'/r)'
+g_up_33 = '(r**2*sin(theta))**(-1)'
+#Riemann tensor components with all 4 indices down
+R_3001 = '0'
+R_3013 = '0'
+R_3003 = '-(1-2*'+str(M)+'/r)*sin(theta)**2/r*'+str(M)
+R_3113 = '-('+str(M)+'*sin(theta)**2)/(2*'+str(M)+'-r)'
+R_3101 = '0'
+R_1001 = str(M)+'*2/r**3' 
