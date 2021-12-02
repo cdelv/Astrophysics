@@ -1,5 +1,5 @@
 import numpy as np
-from scipy.integrate import odeint
+from scipy.integrate import odeint, solve_ivp
 import math
 import matplotlib.pyplot as plt
 import sys
@@ -9,17 +9,6 @@ import importlib
 import sympy
 from sympy import sympify
 from einsteinpy.symbolic import MetricTensor, RiemannCurvatureTensor, predefined
-
-class bcolors:
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKCYAN = '\033[96m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
 
 coord = sympy.symbols('t r theta phi')
 
@@ -65,38 +54,41 @@ def main():
 		g_up_00 = sympy.simplify(data[19]).subs(coord[2], math.pi/2)
 		g_up_11 = sympy.simplify(data[20]).subs(coord[2], math.pi/2)
 		g_up_33 = sympy.simplify(data[21]).subs(coord[2], math.pi/2)
-		### Calculate analitic Metric partial derivatives w.r.t. r
-		Part_g00 = sympy.simplify(sympy.diff(g00, coord[1]))
-		Part_g33 = sympy.simplify(sympy.diff(g33, coord[1]))
-		gamma, Part_gamma = calc_gamma(g00,g11,g33)
 
 	else:
 		#Create the metric tensor
-		Metric_Tensor=Create_Metric_Tensor(M)
+		if data[22]: #user custom metric tensor
+			Metric_Tensor=data[23].change_config('ll')
+		else: #predefined metric tensor
+			Metric_Tensor=Create_Metric_Tensor(M)
 		up_Metric_Tensor = Metric_Tensor.change_config('uu') #metric tensor with 2 up indices
 
 		print(Metric_Tensor)
 		print(up_Metric_Tensor)
 	
 		#Create the Riemann curvature tensor from the metric
-		Riemann_Tensor = Create_Riemann_Tensor(Metric_Tensor) #Make Riemann type (1,3)
-		Riemann_Tensor = Riemann_Tensor.change_config('llll', Metric_Tensor)  #Make Riemann type (0,4)
+		Riemann_Tensor = Create_Riemann_Tensor(Metric_Tensor) #Make Riemann type (0,4)
 
 		## We are always in the plain. Evaluate theta = pi/2 to speed up the code
-		## We are not intrested on the complete tensor, just some slices
-		R_30 = Riemann_Tensor[3][0].subs(coord[2], math.pi/2)
-		print(R_30)
-		R_31 = Riemann_Tensor[3][1].subs(coord[2], math.pi/2)
-		R_10 = Riemann_Tensor[1][0].subs(coord[2], math.pi/2)
-		R_13 = Riemann_Tensor[1][3].subs(coord[2], math.pi/2)
-		Metric_Tensor = Metric_Tensor.subs(coord[2], math.pi/2)
-		up_Metric_Tensor = up_Metric_Tensor.subs(coord[2], math.pi/2)
-		### Calculate analitic Metric partial derivatives respect to r
-		Part_g00 = sympy.diff(Metric_Tensor[0][0], coord[1])
-		Part_g33 = sympy.diff(Metric_Tensor[3][3], coord[1])
-		## Calculate analitic expression of gama and its derivative respect to r
-		#gamma, Part_gamma = calc_gamma(Metric_Tensor)
-		exit()
+		R_3001 = Riemann_Tensor[3,0,0,1].subs(coord[2], math.pi/2)
+		R_3013 = Riemann_Tensor[3,0,1,3].subs(coord[2], math.pi/2)
+		R_3003 = Riemann_Tensor[3,0,0,3].subs(coord[2], math.pi/2)
+		R_3113 = Riemann_Tensor[3,1,1,3].subs(coord[2], math.pi/2)
+		R_3101 = Riemann_Tensor[3,1,0,1].subs(coord[2], math.pi/2)
+		R_1001 = Riemann_Tensor[1,0,0,1].subs(coord[2], math.pi/2)
+		g00 = Metric_Tensor[0,0].subs(coord[2], math.pi/2)
+		g11 = Metric_Tensor[1,1].subs(coord[2], math.pi/2)
+		g33 = Metric_Tensor[3,3].subs(coord[2], math.pi/2)
+		g_up_00 = up_Metric_Tensor[0,0].subs(coord[2], math.pi/2)
+		g_up_11 = up_Metric_Tensor[1,1].subs(coord[2], math.pi/2)
+		g_up_33 = up_Metric_Tensor[3,3].subs(coord[2], math.pi/2)
+		
+
+	### Calculate analitic Metric partial derivatives w.r.t r
+	Part_g00 = sympy.simplify(sympy.diff(g00, coord[1]))
+	Part_g33 = sympy.simplify(sympy.diff(g33, coord[1]))
+	gamma, Part_gamma = calc_gamma(g00,g11,g33)
+
 
 	#Total Angular momentum
 	J = j + s
@@ -106,7 +98,7 @@ def main():
 
 	#Solve ODE
 	z = odeint(dif_equation, z0, t, args=(m, E, s, J, gamma, Part_gamma, Part_g00, Part_g33, g00, g11, g33,
-		g_up_00, g_up_11, g_up_33, R_3001, R_3013, R_3003, R_3113, R_3101, R_1001))
+		g_up_00, g_up_11, g_up_33, R_3001, R_3013, R_3003, R_3113, R_3101, R_1001), rtol=1E-7, atol=1E-7)
 
 	#Plot trayectory
 	plot_trayectory(z,t) #r vs phi
@@ -137,7 +129,6 @@ def Create_Metric_Tensor(M=10):
 	Metric = MetricTensor(list2d, coord)
 	Metric.tensor()
 	'''
-
 	########## Premade schwarzschild metric example ############# c, G, a, M
 	Metric = predefined.janis_newman_winicour.JanisNewmanWinicour(1, 1, 1, M)
 	return Metric  ### Metric_{ab}  a, b in (0 to 4), 2 indices down
@@ -146,10 +137,9 @@ def Create_Riemann_Tensor(Metric):
 	#### Calculate Riemann Tensor from the metric tensor #########
 	Riemann = RiemannCurvatureTensor.from_metric(Metric)
 	Riemann.tensor()
-	return Riemann
+	return Riemann.change_config('llll', Metric)
 
 def calc_gamma(g00,g11,g33):
-
 	#Calculates the analitic expresion of gamma and its derivative w.r.t. to r
 	gamma = sympy.simplify(sympy.sqrt(-1*g00*g11*g33))
 	Part_gamma = sympy.simplify(sympy.diff(gamma, coord[1]))
@@ -157,7 +147,6 @@ def calc_gamma(g00,g11,g33):
 	return gamma, Part_gamma
 
 def calc_momentum(g_up_00, g_up_11, g_up_33, gamma, Part_g00, Part_g33, m, E, s, J):
-
 	P0 = -(2*m*gamma*(2*m*gamma*E+s*J*Part_g00))/(4*m**2*gamma**2+s**2*Part_g00*Part_g33)
 	P3 = (2*m*gamma*(2*m*gamma*J+s*E*Part_g33))/(4*m**2*gamma**2+s**2*Part_g00*Part_g33)
 	P1_2 = -(m**2+g_up_00*P0**2+g_up_33*P3**2)/g_up_11
@@ -173,14 +162,11 @@ def calc_spin_tensor(gamma, P, m, s):
 	return S_13, S_01, S_03
 
 def calc_drdt(R_3001, R_3013, R_3003, R_3113, R_3101, S, P, s, m, gamma, Part_gamma):
-
 	### Calculate R_30ab * S^ab
 	prod1 = R_3013*S[0] + R_3001*S[1] + R_3003*S[2]
-
 	### Calculate R_31ab * S^ab
 	prod2 = R_3113*S[0] + R_3101*S[1] + R_3013*S[2] 
 	#                                   R_3103=R_3013
-
 	fac1 = s/(2*m*gamma)
 	fac2 = s/(2*m*gamma**2)
 
@@ -189,15 +175,12 @@ def calc_drdt(R_3001, R_3013, R_3003, R_3113, R_3101, S, P, s, m, gamma, Part_ga
 	return derivative
 
 def calc_dphidt(R_3001, R_3013, R_3113, R_3101, R_1001, S, P, s, m, gamma, Part_gamma, drdt):
-	
 	### Calculate R_10ab * S^ab
 	prod1 = R_3101*S[0] + R_1001*S[1] + R_3001*S[2]
 	#       R_1013=R_3101,              R_1003=R_3001
-
 	### Calculate R_31ab * S^ab
 	prod2 = R_3113*S[0] -  R_3101*S[1]  -  R_3013*S[2]
 	#       R_1313=R_3113, R_1301=-R_3101, R_1303=-R_3013     
-
 	fac1 = s/(2*m*gamma)
 	fac2 = s/(2*m*gamma**2)
 
@@ -208,25 +191,20 @@ def calc_dphidt(R_3001, R_3013, R_3113, R_3101, R_1001, S, P, s, m, gamma, Part_
 def dif_equation(z,t,m, E, s, J, gamma, Part_gamma, Part_g00, Part_g33, g00, g11, g33, g_up_00, g_up_11, g_up_33, R_3001, R_3013, R_3003, R_3113, R_3101, R_1001):
 	r=z[0]
 	phi=z[1]
-
 	### Evaluate gamma and gamma derivative
 	gamma = gamma.subs([(coord[0], t), (coord[1], r), (coord[3], phi)])
 	Part_gamma = Part_gamma.subs([(coord[0], t), (coord[1], r), (coord[3], phi)])
-
 	### Evaluate metric tensor partial derivatives
 	Part_g00 = Part_g00.subs([(coord[0], t), (coord[1], r), (coord[3], phi)])
 	Part_g33 = Part_g33.subs([(coord[0], t), (coord[1], r), (coord[3], phi)])
-
 	### Evaluate metric tensor components
 	g00 = g00.subs([(coord[0], t), (coord[1], r), (coord[3], phi)])
 	g11 = g11.subs([(coord[0], t), (coord[1], r), (coord[3], phi)])
 	g33 = g33.subs([(coord[0], t), (coord[1], r), (coord[3], phi)])
-
 	### Evaluate up metric tensor components
 	g_up_00 = g_up_00.subs([(coord[0], t), (coord[1], r), (coord[3], phi)])
 	g_up_11 = g_up_11.subs([(coord[0], t), (coord[1], r), (coord[3], phi)])
 	g_up_33 = g_up_33.subs([(coord[0], t), (coord[1], r), (coord[3], phi)])
-
 	### Evaluate Riemann tensor Slices
 	R_3001 = R_3001.subs([(coord[0], t), (coord[1], r), (coord[3], phi)])
 	R_3013 = R_3013.subs([(coord[0], t), (coord[1], r), (coord[3], phi)])
@@ -234,31 +212,26 @@ def dif_equation(z,t,m, E, s, J, gamma, Part_gamma, Part_g00, Part_g33, g00, g11
 	R_3113 = R_3113.subs([(coord[0], t), (coord[1], r), (coord[3], phi)])
 	R_3101 = R_3101.subs([(coord[0], t), (coord[1], r), (coord[3], phi)])
 	R_1001 = R_1001.subs([(coord[0], t), (coord[1], r), (coord[3], phi)])
-
 	### Calculate momentum
 	P = calc_momentum(g_up_00, g_up_11, g_up_33, gamma, Part_g00, Part_g33, m, E, s, J)
-
 	### Calculate non_zero components of the spin tensor
 	S = calc_spin_tensor(gamma, P, m, s)
-
 	### Calculate derivatives 
 	drdt = calc_drdt(R_3001, R_3013, R_3003, R_3113, R_3101, S, P, s, m, gamma, Part_gamma)        # r
 	dphidt = calc_dphidt(R_3001, R_3013, R_3113, R_3101, R_1001, S, P, s, m, gamma, Part_gamma, drdt)  #phi
 
-	return drdt, dphidt
+	return [drdt, dphidt]
 
 def plot_trayectory(z,t):
 	r = z[:,0]
 	phi = z[:,1]
 	x = []
 	y = []
-
 	## convert results to cartesian coordinates for the plot
 	for i in range(len(r)):
 		x.append(r[i]*math.cos(phi[i]))
 		y.append(r[i]*math.sin(phi[i]))
 			
-
 	plt.plot(np.asarray(x),np.asarray(y))
 	plt.show()
 
@@ -285,11 +258,13 @@ def load_file(path):
 	variables = [module.r0, module.phi0, module.E, module.M, module.m, 
 	module.j, module.s, module.tmax, module.steps, module.User_tensor, module.R_3001,
 	module.R_3013,module.R_3003,module.R_3113,module.R_3101,module.R_1001
-	,module.g00,module.g11,module.g33,module.g_up_00,module.g_up_11, module.g_up_33]
+	,module.g00,module.g11,module.g33,module.g_up_00,module.g_up_11, module.g_up_33, module.User_metric]
+	if module.User_metric and not module.User_tensor:
+		variables.append(module.Create_User_Metric_Tensor(coord))
 	return variables
 
 def check_file(data):
-	variables = {'r0', 'phi0', 'E', 'M','m', 'j', 's', 'tmax', 'steps', 'User_tensor'}
+	variables = {'r0', 'phi0', 'E', 'M','m', 'j', 's', 'tmax', 'steps', 'User_tensor', 'User_metric'}
 	if not variables.issubset(dir(data)):
 		for i in variables:
 			if not {i}.issubset(dir(data)):
@@ -302,6 +277,15 @@ def check_file(data):
 	if data.User_tensor:
 		if not variables.issubset(dir(data)):
 			for i in variables2:
+				if not {i}.issubset(dir(data)):
+					print(i,' variable is missing.')
+			file_template()
+			exit()
+
+	variables3 = {'Create_User_Metric_Tensor'}
+	if data.User_metric:
+		if not variables3.issubset(dir(data)):
+			for i in variables3:
 				if not {i}.issubset(dir(data)):
 					print(i,' variable is missing.')
 			file_template()
@@ -330,7 +314,7 @@ j = 1   #Angular momentum
 s = 1   #Spin
 
 #######################
-# Propagation
+# Propagation parameters
 #######################
 tmax = 50        #Maximun time
 steps = 100000   #Number of steps
@@ -338,29 +322,56 @@ steps = 100000   #Number of steps
 #######################
 #   Metric
 #######################
+#If User_tensor = True, uses the components passed by the user. 
+#If User_tensor = False and User_metric = False, uses predetermine einsteinpy JanisNewmanWinicour(1, 1, 1, M) metric.
+#If User_tensor = True and User_metric = True uses the components passed by the user.
+#If User_tensor = Fase and User_metric = True uses function Create_User_Metric_Tensor(coord) to calculate the Riemann tensor from the defined metric. 
+User_tensor = False
+User_metric = False
+#######################
+#   User_tensor
+#######################
 #Enter components in sympy compatible notation. Remember only acepted coordinates are ('t r theta phi')
-#Analitic constants are not admited (yet)
-#If True, uses the components pass by the user. If false, calculates tensor with ----- (in progress)
-User_tensor = True
-#######################
-#The example for schwarzschild metric is given
-#######################
-#Metric tensor components must be in configuration [-1,1,1,1]. 
+#Analitic constants are not admited (yet).
+#Metric tensor components must be in configuration [-1,1,1,1].
+#Input in this section must be strings. 
+
 #These 3 components must have both indices down
 g00 = '-(1-2*'+str(M)+'/r)'
 g11 = '(1-2*'+str(M)+'/r)**(-1)'
 g33 = 'r**2*sin(theta)**2'
+
 #These 3 componets must have both indices up
 g_up_00 = '-(1-2*'+str(M)+'/r)**(-1)'
 g_up_11 = '(1-2*'+str(M)+'/r)'
 g_up_33 = '(r**2*sin(theta))**(-1)'
+
 #Riemann tensor components with all 4 indices down
 R_3001 = '0'
 R_3013 = '0'
 R_3003 = '-(1-2*'+str(M)+'/r)*sin(theta)**2/r*'+str(M)
 R_3113 = '-('+str(M)+'*sin(theta)**2)/(2*'+str(M)+'-r)'
 R_3101 = '0'
-R_1001 = str(M)+'*2/r**3' ''')
+R_1001 = str(M)+'*2/r**3' 
+
+#######################
+#   User_metric
+#######################
+import sympy
+from einsteinpy.symbolic import MetricTensor, predefined
+#Define a function from which the program will create your metric and then calculate the Riemann tensor with it.
+#use sympy compatible notation. remember that only acepted variables are coord = sympy.symbols('t r theta phi')
+#use array notation tu acces the variables, t=coord[0], r=coord[1], theta=coord[2], phi=coord[3]
+
+def Create_User_Metric_Tensor(coord):
+	list2d = [[0 for i in range(4)] for i in range(4)]
+	list2d[0][0] = -(1-2*M/coord[1])
+	list2d[1][1] = 1 / (1 - 2*M / coord[1])
+	list2d[2][2] = coord[1]**2
+	list2d[3][3] = coord[1]**2*sympy.sin(coord[2])**2
+	Metric = MetricTensor(list2d, coord)
+	Metric.tensor()
+	return Metric ''')
 	f.close()
 
 

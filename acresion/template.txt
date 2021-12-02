@@ -1,7 +1,7 @@
 #######################
 # Initial conditions
 #######################
-r0 = 50 
+r0 = 500 
 phi0 = 0
 
 #######################
@@ -9,12 +9,12 @@ phi0 = 0
 #######################
 M = 100 #Black Hole mass
 m = 1   #Particle mass
-E = 5   #Energy
-j = 1   #Angular momentum
-s = 1   #Spin
+E = 300   #Energy
+j = 100   #Angular momentum
+s = 0   #Spin
 
 #######################
-# Propagation
+# Propagation parameters
 #######################
 tmax = 50        #Maximun time
 steps = 100000   #Number of steps
@@ -22,22 +22,30 @@ steps = 100000   #Number of steps
 #######################
 #   Metric
 #######################
+#If User_tensor = True, uses the components passed by the user. 
+#If User_tensor = False and User_metric = False, uses predetermine einsteinpy JanisNewmanWinicour(1, 1, 1, M) metric.
+#If User_tensor = True and User_metric = True uses the components passed by the user.
+#If User_tensor = Fase and User_metric = True uses function Create_User_Metric_Tensor(coord) to calculate the Riemann tensor from the defined metric. 
+User_tensor = False
+User_metric = True
+#######################
+#   User_tensor
+#######################
 #Enter components in sympy compatible notation. Remember only acepted coordinates are ('t r theta phi')
-#Analitic constants are not admited (yet)
-#If True, uses the components pass by the user. If false, calculates tensor with ----- (in progress)
-User_tensor = True
-#######################
-#The example for schwarzschild metric is given
-#######################
-#Metric tensor components must be in configuration [-1,1,1,1]. 
+#Analitic constants are not admited (yet).
+#Metric tensor components must be in configuration [-1,1,1,1].
+#Input in this section must be strings. 
+
 #These 3 components must have both indices down
 g00 = '-(1-2*'+str(M)+'/r)'
 g11 = '(1-2*'+str(M)+'/r)**(-1)'
 g33 = 'r**2*sin(theta)**2'
+
 #These 3 componets must have both indices up
 g_up_00 = '-(1-2*'+str(M)+'/r)**(-1)'
 g_up_11 = '(1-2*'+str(M)+'/r)'
 g_up_33 = '(r**2*sin(theta))**(-1)'
+
 #Riemann tensor components with all 4 indices down
 R_3001 = '0'
 R_3013 = '0'
@@ -45,3 +53,22 @@ R_3003 = '-(1-2*'+str(M)+'/r)*sin(theta)**2/r*'+str(M)
 R_3113 = '-('+str(M)+'*sin(theta)**2)/(2*'+str(M)+'-r)'
 R_3101 = '0'
 R_1001 = str(M)+'*2/r**3' 
+
+#######################
+#   User_metric
+#######################
+import sympy
+from einsteinpy.symbolic import MetricTensor, predefined
+#Define a function from which the program will create your metric and then calculate the Riemann tensor with it.
+#use sympy compatible notation. remember that only acepted variables are coord = sympy.symbols('t r theta phi')
+#use array notation tu acces the variables, t=coord[0], r=coord[1], theta=coord[2], phi=coord[3]
+
+def Create_User_Metric_Tensor(coord):
+	list2d = [[0 for i in range(4)] for i in range(4)]
+	list2d[0][0] = -(1-2*M/coord[1])
+	list2d[1][1] = 1 / (1 - 2*M / coord[1])
+	list2d[2][2] = coord[1]**2
+	list2d[3][3] = coord[1]**2*sympy.sin(coord[2])**2
+	Metric = MetricTensor(list2d, coord)
+	Metric.tensor()
+	return Metric 
