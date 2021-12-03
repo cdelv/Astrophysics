@@ -88,6 +88,7 @@ def main():
 	Part_g00 = sympy.simplify(sympy.diff(g00, coord[1]))
 	Part_g33 = sympy.simplify(sympy.diff(g33, coord[1]))
 	gamma, Part_gamma = calc_gamma(g00,g11,g33)
+	#print_variables(g00, g11, g33, g_up_00, g_up_11, g_up_33, R_3001, R_3013, R_3003, R_3113, R_3101, R_1001)
 
 
 	#Total Angular momentum
@@ -98,24 +99,24 @@ def main():
 
 	#Solve ODE
 	z = odeint(dif_equation, z0, t, args=(m, E, s, J, gamma, Part_gamma, Part_g00, Part_g33, g00, g11, g33,
-		g_up_00, g_up_11, g_up_33, R_3001, R_3013, R_3003, R_3113, R_3101, R_1001), rtol=1E-7, atol=1E-7)
+		g_up_00, g_up_11, g_up_33, R_3001, R_3013, R_3003, R_3113, R_3101, R_1001), rtol=1E-8, atol=1E-8)
 
 	#Plot trayectory
 	plot_trayectory(z,t) #r vs phi
 
 def print_variables(g00, g11, g33, g_up_00, g_up_11, g_up_33, R_3001, R_3013, R_3003, R_3113, R_3101, R_1001):
-	print('g00=',g00)
-	print('g11=',g11)
-	print('g33=',g33)
-	print('g_up_00=',g_up_00)
-	print('g_up_11=',g_up_11)
-	print('g_up_33=',g_up_33)
-	print('R_3001=',R_3001)
-	print('R_3013=',R_3013)
-	print('R_3003=',R_3003)
-	print('R_3113=',R_3113)
-	print('R_3101=',R_3101)
-	print('R_1001=',R_1001)
+	#print('g_11=',sympy.pprint(g11))
+	sympy.print(g11,"g_11")
+	#sympy.pprint('g_33='+str(g33))
+	#sympy.pprint('g_up_00='+str(g_up_00))
+	#sympy.pprint('g_up_11='+str(g_up_11))
+	#sympy.pprint('g_up_33='+str(g_up_33))
+	#sympy.pprint('R_3001=',R_3001)
+	#sympy.pprint('R_3013=',R_3013)
+	#sympy.pprint('R_3003=',R_3003)
+	#sympy.pprint('R_3113=',R_3113)
+	#sympy.pprint('R_3101=',R_3101)
+	#sympy.pprint('R_1001=',R_1001)
 
 def Create_Metric_Tensor(M=10):
 	#### Define problem metric #########
@@ -150,6 +151,9 @@ def calc_momentum(g_up_00, g_up_11, g_up_33, gamma, Part_g00, Part_g33, m, E, s,
 	P0 = -(2*m*gamma*(2*m*gamma*E+s*J*Part_g00))/(4*m**2*gamma**2+s**2*Part_g00*Part_g33)
 	P3 = (2*m*gamma*(2*m*gamma*J+s*E*Part_g33))/(4*m**2*gamma**2+s**2*Part_g00*Part_g33)
 	P1_2 = -(m**2+g_up_00*P0**2+g_up_33*P3**2)/g_up_11
+
+	if P1_2 < 0.000000001:
+		return P0, 0.0, P3
 
 	return P0, math.sqrt(P1_2), P3
 	
@@ -233,12 +237,21 @@ def plot_trayectory(z,t):
 		y.append(r[i]*math.sin(phi[i]))
 			
 	plt.plot(np.asarray(x),np.asarray(y))
+	plt.title('Particle trayectory', fontsize=18, pad=15)
+	plt.xlabel('x', fontsize=15)
+	plt.ylabel('y', fontsize=15)
 	plt.show()
 
 	plt.plot(t,np.asarray(x))
+	plt.title('r coordinate vs time', fontsize=18, pad=15)
+	plt.xlabel('time', fontsize=15)
+	plt.ylabel('r', fontsize=15)
 	plt.show()
 
 	plt.plot(t,np.asarray(y))
+	plt.title('phi coordinate vs time', fontsize=18, pad=15)
+	plt.xlabel('time', fontsize=15)
+	plt.ylabel('phi', fontsize=15)
 	plt.show()
 
 def load_file(path):
@@ -301,17 +314,18 @@ def file_template():
 		f.write('''#######################
 # Initial conditions
 #######################
-r0 = 50 
+r0 = 6 
 phi0 = 0
 
 #######################
 # Program parameters
 #######################
-M = 100 #Black Hole mass
+import math
+M = 1 #Black Hole mass
 m = 1   #Particle mass
-E = 5   #Energy
-j = 1   #Angular momentum
-s = 1   #Spin
+E = math.sqrt(8/9)   #Energy
+j = math.sqrt(12)   #Angular momentum
+s = 0   #Spin
 
 #######################
 # Propagation parameters

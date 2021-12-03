@@ -1,23 +1,24 @@
 #######################
 # Initial conditions
 #######################
-r0 = 500 
+r0 = 6 
 phi0 = 0
 
 #######################
 # Program parameters
 #######################
-M = 100 #Black Hole mass
+import math
+M = 1 #Black Hole mass
 m = 1   #Particle mass
-E = 300   #Energy
-j = 100   #Angular momentum
+E = math.sqrt(8/9)   #Energy
+j = math.sqrt(12)   #Angular momentum
 s = 0   #Spin
 
 #######################
 # Propagation parameters
 #######################
 tmax = 50        #Maximun time
-steps = 100000   #Number of steps
+steps = 1000000   #Number of steps
 
 #######################
 #   Metric
@@ -27,7 +28,7 @@ steps = 100000   #Number of steps
 #If User_tensor = True and User_metric = True uses the components passed by the user.
 #If User_tensor = Fase and User_metric = True uses function Create_User_Metric_Tensor(coord) to calculate the Riemann tensor from the defined metric. 
 User_tensor = False
-User_metric = True
+User_metric = False
 #######################
 #   User_tensor
 #######################
