@@ -1,29 +1,35 @@
-import numpy as np
-from scipy.integrate import odeint, solve_ivp
 import math
-import matplotlib.pyplot as plt
 import sys
 import os
 import importlib
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.integrate import odeint
 
+#Symbolic algebra libraries
 import sympy
 from sympy import sympify
 from einsteinpy.symbolic import MetricTensor, RiemannCurvatureTensor, predefined
 
+#Symbolic coordinates
 coord = sympy.symbols('t r theta phi')
 
-def main():
+# To do:
+# Energy plots conditions on template
+# A good .out log
 
+
+def main():
 	if len(sys.argv) != 2:
 		file_template()
 		sys.exit("Usage: python acresion.py parameters.txt")
 	
 	data = load_file(sys.argv[1])
 
-	##### black whole mass
+	#Black hole mass
 	M = data[3]
 
-	#Initial conditions   r, phi.
+	#Initial conditions   [r, phi]
 	z0=[data[0],data[1]]
 	tmax = data[7]
 	steps = data[8]
@@ -40,8 +46,9 @@ def main():
 	#Spin Angular momentum
 	s = data[6]
 
+	#If user gives components of Riemann and metric tensors
 	if data[9]:
-		## We are always in the plain. Evaluate theta = pi/2 to speed up the code
+		#We are always in the plain. Evaluate theta = pi/2 to speed up the code
 		R_3001 = sympy.simplify(data[10]).subs(coord[2], math.pi/2)
 		R_3013 = sympy.simplify(data[11]).subs(coord[2], math.pi/2)
 		R_3003 = sympy.simplify(data[12]).subs(coord[2], math.pi/2)
@@ -55,13 +62,15 @@ def main():
 		g_up_11 = sympy.simplify(data[20]).subs(coord[2], math.pi/2)
 		g_up_33 = sympy.simplify(data[21]).subs(coord[2], math.pi/2)
 
+	#If user asks the program to calculate the Riemann tensor. 
 	else:
 		#Create the metric tensor
-		if data[22]: #user custom metric tensor
+		if data[22]: #User custom metric tensor
 			Metric_Tensor=data[23].change_config('ll')
-		else: #predefined metric tensor
+		else: #Predefined metric tensor
 			Metric_Tensor=Create_Metric_Tensor(M)
-		up_Metric_Tensor = Metric_Tensor.change_config('uu') #metric tensor with 2 up indices
+
+		up_Metric_Tensor = Metric_Tensor.change_config('uu') #Metric tensor with 2 up indices.
 
 		print(Metric_Tensor)
 		print(up_Metric_Tensor)
@@ -69,7 +78,7 @@ def main():
 		#Create the Riemann curvature tensor from the metric
 		Riemann_Tensor = Create_Riemann_Tensor(Metric_Tensor) #Make Riemann type (0,4)
 
-		## We are always in the plain. Evaluate theta = pi/2 to speed up the code
+		#We are always in the plain. Evaluate theta = pi/2 to speed up the code
 		R_3001 = Riemann_Tensor[3,0,0,1].subs(coord[2], math.pi/2)
 		R_3013 = Riemann_Tensor[3,0,1,3].subs(coord[2], math.pi/2)
 		R_3003 = Riemann_Tensor[3,0,0,3].subs(coord[2], math.pi/2)
@@ -84,7 +93,7 @@ def main():
 		g_up_33 = up_Metric_Tensor[3,3].subs(coord[2], math.pi/2)
 		
 
-	### Calculate analitic Metric partial derivatives w.r.t r
+	#Calculate analitic Metric partial derivatives w.r.t r
 	Part_g00 = sympy.simplify(sympy.diff(g00, coord[1]))
 	Part_g33 = sympy.simplify(sympy.diff(g33, coord[1]))
 	gamma, Part_gamma = calc_gamma(g00,g11,g33)
@@ -94,15 +103,16 @@ def main():
 	#Total Angular momentum
 	J = j + s
 
-	#time span
+	#Time span
 	t=np.linspace(0,tmax,steps) #start, finish, n of points
 
 	#Solve ODE
 	z = odeint(dif_equation, z0, t, args=(m, E, s, J, gamma, Part_gamma, Part_g00, Part_g33, g00, g11, g33,
 		g_up_00, g_up_11, g_up_33, R_3001, R_3013, R_3003, R_3113, R_3101, R_1001), rtol=1E-8, atol=1E-8)
 
-	#Plot trayectory
+	#Plot trayectory and energy
 	plot_trayectory(z,t) #r vs phi
+	plot_energy(z,t,m,E,s, J, gamma, Part_g00, Part_g33,g_up_00, g_up_11, g_up_33)
 
 def print_variables(g00, g11, g33, g_up_00, g_up_11, g_up_33, R_3001, R_3013, R_3003, R_3113, R_3101, R_1001):
 	#print('g_11=',sympy.pprint(g11))
@@ -231,7 +241,7 @@ def plot_trayectory(z,t):
 	phi = z[:,1]
 	x = []
 	y = []
-	## convert results to cartesian coordinates for the plot
+	## Convert results to cartesian coordinates for the plot
 	for i in range(len(r)):
 		x.append(r[i]*math.cos(phi[i]))
 		y.append(r[i]*math.sin(phi[i]))
@@ -253,6 +263,52 @@ def plot_trayectory(z,t):
 	plt.xlabel('time', fontsize=15)
 	plt.ylabel('phi', fontsize=15)
 	plt.show()
+
+def plot_energy(z,t,m,E,s, J, gamma, Part_g00, Part_g33,g_up_00, g_up_11, g_up_33):
+	#E=-P0-s*P3*Part_g00/(2*m*gamma)
+	e=np.zeros(len(t))
+	j=np.zeros(len(t))
+	P0=np.zeros(len(t))
+	P3=np.zeros(len(t))
+	PG00=np.zeros(len(t))
+	PG33=np.zeros(len(t))
+	Gamma=np.zeros(len(t))
+	for i in range(len(t)):
+		r=z[i,0]
+		phi=z[i,1]
+		### Evaluate gamma
+		GGamma = gamma.subs([(coord[0], t[i]), (coord[1], r), (coord[3], phi)])
+		### Evaluate metric tensor partial derivatives
+		PPart_g00 = Part_g00.subs([(coord[0], t[i]), (coord[1], r), (coord[3], phi)])
+		PPart_g33 = Part_g33.subs([(coord[0], t[i]), (coord[1], r), (coord[3], phi)])
+		### Evaluate up metric tensor components
+		G_up_00 = g_up_00.subs([(coord[0], t[i]), (coord[1], r), (coord[3], phi)])
+		G_up_11 = g_up_11.subs([(coord[0], t[i]), (coord[1], r), (coord[3], phi)])
+		G_up_33 = g_up_33.subs([(coord[0], t[i]), (coord[1], r), (coord[3], phi)])
+
+		### Calculate momentum
+		P0[i]=-(2*m*GGamma*(2*m*GGamma*E+s*J*PPart_g00))/(4*m**2*GGamma**2+s**2*PPart_g00*PPart_g33)
+		P3[i]=(2*m*GGamma*(2*m*GGamma*J+s*E*PPart_g33))/(4*m**2*GGamma**2+s**2*PPart_g00*PPart_g33)
+		PG00[i]=PPart_g00
+		PG33[i]=PPart_g33
+		Gamma[i]=GGamma
+
+	e=-P0-s*P3*PG00/(2*m*Gamma)
+	j=P3-s*P0*PG33/(2*m*GGamma)
+	print('Energy difference is ', e[0]-e[len(t)-1])
+	print('Angular momentum difference is ', j[0]-j[len(t)-1])
+
+	plt.plot(t,e)
+	plt.title('Particle Energy', fontsize=18, pad=15)
+	plt.xlabel('t', fontsize=15)
+	plt.ylabel('Energy', fontsize=15)
+	plt.show()
+	plt.plot(t,j)
+	plt.title('Particle angular momentum', fontsize=18, pad=15)
+	plt.xlabel('t', fontsize=15)
+	plt.ylabel('momentum', fontsize=15)
+	plt.show()
+
 
 def load_file(path):
 	if not os.path.isfile(path):
@@ -305,13 +361,16 @@ def check_file(data):
 			exit()
 
 def file_template():
-	print('You have to pass a file with the program parameters. Take a look to the file template.txt tha was just created.')
+	print('You have to pass a file with the program parameters. Take a look at the file template.txt that was just created.')
 	print('Edit template.txt and add the parameters you want. Do not change variable names.')
-	print('In case of an error template.txt will be overwritten. Please use a different name for your working file.')
+	print('In case of an error, template.txt will be overwritten. Please use a different name for your working file.')
 
 
 	with open('template.txt', 'w') as f:
-		f.write('''#######################
+		f.write('''import math
+import sympy
+from einsteinpy.symbolic import MetricTensor, predefined
+#######################
 # Initial conditions
 #######################
 r0 = 6 
@@ -320,8 +379,7 @@ phi0 = 0
 #######################
 # Program parameters
 #######################
-import math
-M = 1 #Black Hole mass
+M = 1 #Black hole mass
 m = 1   #Particle mass
 E = math.sqrt(8/9)   #Energy
 j = math.sqrt(12)   #Angular momentum
@@ -336,31 +394,31 @@ steps = 100000   #Number of steps
 #######################
 #   Metric
 #######################
-#If User_tensor = True, uses the components passed by the user. 
-#If User_tensor = False and User_metric = False, uses predetermine einsteinpy JanisNewmanWinicour(1, 1, 1, M) metric.
-#If User_tensor = True and User_metric = True uses the components passed by the user.
-#If User_tensor = Fase and User_metric = True uses function Create_User_Metric_Tensor(coord) to calculate the Riemann tensor from the defined metric. 
+#If User_tensor = True, the program uses the components passed by the user. 
+#If User_tensor = False and User_metric = False, the program uses predetermine einsteinpy JanisNewmanWinicour(1, 1, 1, M) metric.
+#If User_tensor = True and User_metric = True, the program uses the components passed by the user.
+#If User_tensor = Fase and User_metric = True, the program uses function Create_User_Metric_Tensor(coord) to calculate the Riemann tensor from the defined metric. 
 User_tensor = False
 User_metric = False
 #######################
-#   User_tensor
+#   User_tensor  (User_tensor = True)
 #######################
-#Enter components in sympy compatible notation. Remember only acepted coordinates are ('t r theta phi')
-#Analitic constants are not admited (yet).
+#Enter components in Sympy compatible notation. Remember only accepted coordinates are ('t r theta phi')
+#Symbolic constants are not admitted.
 #Metric tensor components must be in configuration [-1,1,1,1].
 #Input in this section must be strings. 
 
-#These 3 components must have both indices down
+#These 3 components must have both indices down.
 g00 = '-(1-2*'+str(M)+'/r)'
 g11 = '(1-2*'+str(M)+'/r)**(-1)'
 g33 = 'r**2*sin(theta)**2'
 
-#These 3 componets must have both indices up
+#These 3 componets must have both indices up.
 g_up_00 = '-(1-2*'+str(M)+'/r)**(-1)'
 g_up_11 = '(1-2*'+str(M)+'/r)'
 g_up_33 = '(r**2*sin(theta))**(-1)'
 
-#Riemann tensor components with all 4 indices down
+#Riemann tensor components with all 4 indices down.
 R_3001 = '0'
 R_3013 = '0'
 R_3003 = '-(1-2*'+str(M)+'/r)*sin(theta)**2/r*'+str(M)
@@ -369,13 +427,12 @@ R_3101 = '0'
 R_1001 = str(M)+'*2/r**3' 
 
 #######################
-#   User_metric
+#   User_metric  (User_tensor = Fase and User_metric = True)
 #######################
-import sympy
-from einsteinpy.symbolic import MetricTensor, predefined
 #Define a function from which the program will create your metric and then calculate the Riemann tensor with it.
-#use sympy compatible notation. remember that only acepted variables are coord = sympy.symbols('t r theta phi')
-#use array notation tu acces the variables, t=coord[0], r=coord[1], theta=coord[2], phi=coord[3]
+#Use Sympy compatible notation. remember that only accepted variables are coord = sympy.symbols('t r theta phi').
+#Use array notation tu acces the variables, t=coord[0], r=coord[1], theta=coord[2], phi=coord[3].
+#This is an einsteinpy metric tensor.
 
 def Create_User_Metric_Tensor(coord):
 	list2d = [[0 for i in range(4)] for i in range(4)]
@@ -385,7 +442,10 @@ def Create_User_Metric_Tensor(coord):
 	list2d[3][3] = coord[1]**2*sympy.sin(coord[2])**2
 	Metric = MetricTensor(list2d, coord)
 	Metric.tensor()
-	return Metric ''')
+	return Metric 
+
+
+#Please report any bugs to cdelv@unal.edu.co or to the git repository https://github.com/cdelv/Astrophysics''')
 	f.close()
 
 
